@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace Engineering_Calculator
 {
+    //abstract class to define custom form elemets behavior
     abstract class FormElement
     {
         public FormElement()

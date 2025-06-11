@@ -69,6 +69,8 @@ namespace Engineering_Calculator
                 element.Draw(e.Graphics);
         }
 
+        //function responsible for mouse click event: in context of this project is responsible for redrawing customTextField (formElements[0])
+        //and changing its caption
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
             //to properly give a handler for graphics to drawing function graphics has to be crated in mouse handler function
@@ -86,15 +88,18 @@ namespace Engineering_Calculator
                                     formElements[0].Draw(g);
                                     break;
                                 case "<<<":
-                                    formElements[0].Caption = formElements[0].Caption.Substring(0, formElements[0].Caption.Length - 1);
-                                    formElements[0].Draw(g);
+                                    if (formElements[0].Caption != "")
+                                    {
+                                        formElements[0].Caption = formElements[0].Caption.Substring(0, formElements[0].Caption.Length - 1);
+                                        formElements[0].Draw(g);
+                                    }
                                     break;
                                 case "Pi":
-                                    formElements[0].Caption = "3.141592";
+                                    formElements[0].Caption += "3.141592";
                                     formElements[0].Draw(g);
                                     break;
                                 case "e":
-                                    formElements[0].Caption = "2.71828";
+                                    formElements[0].Caption += "2.71828";
                                     formElements[0].Draw(g);
                                     break;
                                 case "sin":
@@ -151,6 +156,73 @@ namespace Engineering_Calculator
                             }                  
                         }
                     }             
+        }
+
+        //fubction responsible for key pressing event: in context of this project it changes customTextFiled (formElements[0]) caption as well
+        //as redraws it
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //to properly give a handler for graphics to drawing function graphics has to be crated in mouse handler function
+            System.Drawing.Graphics g = this.CreateGraphics();
+            //if(e.KeyCode)
+
+        }
+        //function responsible for key pressing event: in context of this project it changes customTextFiled (formElements[0]) caption as well
+        //as redraws it
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {       
+            
+            //to properly give a handler for graphics to drawing function graphics has to be crated in mouse handler function
+            System.Drawing.Graphics g = this.CreateGraphics();
+            //if (e.KeyCode == Keys.Back)
+            //{
+            //    formElements[0].Caption = formElements[0].Caption.Substring(0, formElements[0].Caption.Length - 1);
+            //    formElements[0].Draw(g);
+
+            //}
+            switch (e.KeyCode)
+            { 
+                case Keys.Enter:
+                    try
+                    {
+                        Calculation calculation = new Calculation(formElements[0].Caption);
+                        if (calculation.IsValid) formElements[0].Caption = Convert.ToString(calculation.Result);
+                        else formElements[0].Caption = "Invalid expression";
+                    }
+                    catch (Exception ex)  // calculation.Calculate(string input) may drop an exeption
+                    {
+                        formElements[0].Caption = ex.Message;
+                    }
+                    formElements[0].Draw(g);
+                    break;
+                case Keys.Back:
+                    if (formElements[0].Caption != "")
+                    { 
+                        formElements[0].Caption = formElements[0].Caption.Substring(0, formElements[0].Caption.Length - 1);
+                        formElements[0].Draw(g);
+                    }
+                    break;
+                default:
+                    if (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.Z)
+                    {
+                        if (e.KeyCode >= Keys.A && e.KeyCode <= Keys.Z)
+                        {
+                            formElements[0].Caption += e.KeyCode.ToString().ToLower();
+                            formElements[0].Draw(g);
+                        }
+                        else if (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
+                        {
+                            string key = e.KeyCode.ToString();
+                            key = key.Trim('D');
+                            formElements[0].Caption += key;
+                            formElements[0].Draw(g);
+
+                        }
+                    }
+                    break;
+
+            }
+
         }
     }
 }
