@@ -80,8 +80,7 @@ namespace Engineering_Calculator
             int openedBracketsCount = 0;
             int closedBracketsCount = 0;
 
-
-            if (c == '*' || c == '/' || c == '+' || c == '^' || c == ')')
+            if (!Char.IsLetter(c) && !Char.IsDigit(c) && c != '-') 
                 return false;
             for (int i = 0; i < expression.Length; i++)
             {
@@ -229,10 +228,10 @@ namespace Engineering_Calculator
                         openedBracketIndexes.Add(i);
                     else if (expression[i] == ')' && expression[i + 1] == '^')
                     {
-                        subexpressionWithBrackets = expression.Substring(openedBracketIndexes.Last(), i + 1 - openedBracketIndexes.Last());       //[^1] means last item of the list index
+                        subexpressionWithBrackets = expression.Substring(openedBracketIndexes.Last(), i + 1 - openedBracketIndexes.Last()); //[^1] means last item of the list index
                         subexpression = Regex.Replace(subexpressionWithBrackets, "\\(|\\)", "");                                            //Escapes a minimal set of characters(Regex.Escape)
                         Regex subexpBrackets = new Regex(Regex.Escape(subexpressionWithBrackets));                                          //(\, *, +, ?, |, {, [, (,), ^, $, ., #, .,  
-                        i = openedBracketIndexes.Last();                                                                                       //space)by replacing them with their escape codes
+                        i = openedBracketIndexes.Last();                                                                                    //space)by replacing them with their escape codes
                         subresult = Calculate(subexpression);                                                                               //Made for cases like (-2)^(-2), to 
                         if (subresult < 0)                                                                                                  //avoid sequences like 2-^2-. (*)
                             expression = subexpBrackets.Replace(expression, Convert.ToString(-1 * subresult) + '-', 1);                     //replacing first match of escaped subexpressionWithBrackets
@@ -272,7 +271,7 @@ namespace Engineering_Calculator
             if (expression[0] == '-') expression = "0" + expression;                                                                //0 is inserted to insure proper calculation of sequence
                                                                                                                                     // sequences of type:
             expression = Calculate("(asin|acos|atan)(\\-)?\\d+[\\.?\\d]*", expression, 4);                                          // asin-3 or acos90 (just a single operation)                                                                              
-            expression = Calculate("(sin|cos|tan|ln|log|sqrt)(\\-)?\\d+[\\.?\\d]*", expression, 3);                                      // sin-3 or cos90   (just a single operation)
+            expression = Calculate("(sin|cos|tan|ln|log|sqrt)(\\-)?\\d+[\\.?\\d]*", expression, 3);                                 // sin-3 or cos90   (just a single operation)
             expression = Calculate("\\d+[\\.?\\d]*\\-\\^\\-(\\d+[\\.?\\d]*\\-\\^\\-)*\\d+[\\.?\\d]*", expression, 2);               // 3-^-2-^-4...-^-0.3
             expression = Calculate("\\d+[\\.?\\d]*(\\^\\-|\\-\\^)(\\d+[\\.?\\d]*(\\^\\-|\\-\\^))*\\d+[\\.?\\d]*", expression, 1);   // 3^-2^-0.4...^-3 
             expression = Calculate("\\d+[\\.?\\d]*\\^(\\d+[\\.?\\d]*\\^)*\\d+[\\.?\\d]*", expression, 0);                           // 3^2^0.4...^3 
@@ -291,12 +290,13 @@ namespace Engineering_Calculator
             string number = "^(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?$";                                                             //(^ and $ means only what is between them)
                                                                                                                                     //also defining nums like 2.5600000000000013E-06
 
-            if (expression == "NaN")                                                                                                //if result is not defined (like acos(2))
-                throw new Exception("NaN value");
-            else if (expression == "Infinity")                                                                                      //if result is infinity (1/0)
-                throw new Exception("Infinity");
+            if (expression.Contains("NaN"))                                                                                         //if result is not defined (like acos(2))
+                throw new Exception("NaN value");                                                                                   //it will contain "NaN" in expression
+            else if (expression.Contains("Infinity"))                                                                               //if result is infinity (1/0)
+                throw new Exception("Infinity");                                                                                    //it will contain "Infinity" in expression                                                             
             if (Regex.IsMatch(expression, number, RegexOptions.IgnoreCase))
-                result = Double.Parse(expression, CultureInfo.InvariantCulture);
+                //result = Double.Parse(expression, CultureInfo.InvariantCulture);
+                result = Double.Parse(expression);
             else
                 result = Calculate(expression);
             return result;
