@@ -106,6 +106,7 @@ namespace Engineering_Calculator
             Brush brush = new SolidBrush(Color.Black);
             g.FillRectangle(brush, rect);
             Brush brush1 = new SolidBrush(Color.Orange);
+
             //Font with even character length
             Font fnt = new System.Drawing.Font("Consolas", (float)20);
             if (Caption.Length <= 43)
@@ -116,9 +117,6 @@ namespace Engineering_Calculator
                 visibleCaption = visibleCaption.Substring(visibleCaption.Length-43);
                 g.DrawString(visibleCaption, fnt, brush1, x + 10, y + 5);
             }
-            
-
         }
-
     }
 }

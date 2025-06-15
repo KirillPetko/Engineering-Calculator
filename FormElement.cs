@@ -15,7 +15,7 @@ namespace Engineering_Calculator
         {
         } 
 
-        //since each element in form will be represented by rectangle (even square buttons),
+        //since each element in form will be represented by rectangle,
         //there are cords of upper right corner, widht and height schematized 
         public abstract int X { get; set; }
         public abstract int Y { get; set; }
@@ -26,8 +26,6 @@ namespace Engineering_Calculator
         public bool checkPoint(int px, int py)
         {
             return (px > X && py > Y) && (px < X + Width && py < Y + Height) ? true : false;
-
         }
-
     }
 }
