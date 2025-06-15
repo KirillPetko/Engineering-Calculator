@@ -17,9 +17,8 @@ namespace Engineering_Calculator
         public CalculatorForm()
         {
             InitializeComponent();
-            //first button coordds (bx = -25 because first addittion slides button)
+            //first button coords 
             int bx = -25, by = 150, bWidth = 75, bHeight = 75;
-            //counter used for aligning 9 buttons in one row
             int rowButtonCounter = 0;
 
             for (int i = 0; i < formElements.Length; i++)
@@ -28,8 +27,6 @@ namespace Engineering_Calculator
                     formElements[i] = new customTextField();
                 else
                 {
-                    //since one of formElements is a customTextfield 
-                    //number of captions is less than elements by 1
                     formElements[i] = new customButton(bx, by, bWidth, bHeight, captions[i-1]);
                     rowButtonCounter++;
                 }

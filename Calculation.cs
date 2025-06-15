@@ -271,7 +271,7 @@ namespace Engineering_Calculator
                     }
 
                 }
-                else //')' is met at the end of the expression string
+                else //')' is at the end of the expression
                 {
                     if (expression[i] == ')')
                     {
@@ -303,12 +303,10 @@ namespace Engineering_Calculator
 
             expression = Calculate(sequences["add-sub"], expression, 0);
 
-            //result is not defined (like acos(2)) contains "NaN"
             if (expression.Contains("NaN"))                                                                                         
-                throw new Exception("NaN value");    
-            //result is infinity (1/0) contains "Infinity"
+                throw new ArithmeticException("NaN value");    
             else if (expression.Contains("Infinity"))                                                                               
-                throw new Exception("Infinity");                                                                                                                                           
+                throw new ArithmeticException("Infinity");                                                                                                                                           
             if (Regex.IsMatch(expression, sequences["sci-number"], RegexOptions.IgnoreCase))
                 result = Double.Parse(expression, CultureInfo.InvariantCulture); 
             else
@@ -363,7 +361,7 @@ namespace Engineering_Calculator
         //calculates sequenses of same priority replacing them with fractional number represented in a string
         static string Calculate(Match seqence, int operationType)
         {
-            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos sci number)
+            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos-sci number)
             MatchCollection numbers;
             double result;
             string resultS;
@@ -396,14 +394,14 @@ namespace Engineering_Calculator
             if (operationType != 3 && operationType != 4)
             {
                 MatchCollection operations = operation.Matches(seqence.Value);
-                result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture); //result of each sequence of operations 
-                for (int i = 0; i < operations.Count; i++)                             //with same priority is formed by performing 
-                {                                                                      //this operation with previous result, forming 
-                    double x = Double.Parse(numbers[i + 1].Value, CultureInfo.InvariantCulture); //new value to perform this operation 
-                    result = Calculate(result, x, operations[i].Value);                //again on the next step, untill sequence is not 
-                }                                                                      //calculated completely, then result is returned 
-                                                                                       //to replace the sequence in expression
-            }                                                                                       
+                result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture);          //result of each sequence of operations 
+                for (int i = 0; i < operations.Count; i++)                                      //with same priority is formed by  
+                {                                                                               //performing this operation with previous  
+                    double x = Double.Parse(numbers[i + 1].Value, CultureInfo.InvariantCulture);//result, forming new value to perform 
+                    result = Calculate(result, x, operations[i].Value);                         //this operation again on the next step,  
+                }                                                                               //untill sequence is not calculated  
+                                                                                                //completely, then result is returned 
+            }                                                                                   //to replace the sequence in expression    
             //operation is trigonometry one -> return result of that single operation
             else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(seqence.Value).Value);
 

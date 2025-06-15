@@ -106,14 +106,13 @@ namespace Engineering_Calculator
             Brush brush;
             Font fnt;
             Pen pen;
-            //for caption of button
             if (caption == "C" || caption == "<-")
                 brush = new SolidBrush(Color.Red);
             else
                 brush = new SolidBrush(Color.Black);
             fnt = new System.Drawing.Font("SansSerif", (float)15);
 
-            //border rectangle
+            //borders
             pen = new Pen(Color.Black, 1);
             Rectangle rect = new Rectangle(X, Y, Width, Height);
             g.DrawRectangle(pen, rect);

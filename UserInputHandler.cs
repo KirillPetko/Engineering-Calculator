@@ -61,9 +61,9 @@ namespace Engineering_Calculator
             }
         }
 
-        //passes expression (textField.Caption) to Calculation() instance, then changes caption of 
+        //passes textField.Caption to Calculation() instance, then changes caption of 
         //text field depending on result of Calculate() function (result string or exeption message)
-        //lockes if catches exeption or invalid expression message 
+        //lockes if catches exeption or invalid expression message, displaying related message 
         public void calculateCaption(Graphics g, FormElement textField, Calculation calculation)
         {
             //in case of any non-implemented exeption display it in English
@@ -83,8 +83,8 @@ namespace Engineering_Calculator
                     isLocked = true;
                 } 
             }
-            catch (Exception ex) //calculation.Calculate(string input) may drop an exeption
-            {                    //all exeptions are handled the same way 
+            catch (Exception ex) 
+            {                     
                 textField.Caption = ex.Message;
                 isLocked = true;
             }
