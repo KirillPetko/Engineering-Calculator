@@ -99,21 +99,25 @@ namespace Engineering_Calculator
                 else caption = value;
 
             }
-        
         }
         
         public override void Draw(Graphics g)
         {
-            //for caption of button
-            Brush brush = new SolidBrush(Color.Black);
-            Font fnt = new System.Drawing.Font("SansSerif", (float)15);
+            Brush brush;
+            Font fnt;
+            Pen pen;
+            if (caption == "C" || caption == "<-")
+                brush = new SolidBrush(Color.Red);
+            else
+                brush = new SolidBrush(Color.Black);
+            fnt = new System.Drawing.Font("SansSerif", (float)15);
 
-            //border rectangle
-            Pen pen = new Pen(Color.Black, 1);
+            //borders
+            pen = new Pen(Color.Black, 1);
             Rectangle rect = new Rectangle(X, Y, Width, Height);
             g.DrawRectangle(pen, rect);
 
-            //centring caption in buttons rectangle by caption length
+            //centring caption in button rectangle by caption length
             if (caption.Length == 1) 
                 g.DrawString(caption, fnt, brush, x + 30, y+25);
             else if (caption.Length == 2)
@@ -122,7 +126,6 @@ namespace Engineering_Calculator
                 g.DrawString(caption, fnt, brush, x + 20, y + 25);
             else if(caption.Length == 4)
                 g.DrawString(caption, fnt, brush, x + 15, y + 25);
-
         }
     }
 }

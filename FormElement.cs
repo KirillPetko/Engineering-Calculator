@@ -8,14 +8,15 @@ using System.Windows.Forms;
 
 namespace Engineering_Calculator
 {
+    //abstract class to define custom form elemets behavior
     abstract class FormElement
     {
         public FormElement()
         {
         } 
 
-        //since each element in form will be represented by rectangle (even square buttons),
-        //there are cords of upper right corner, widht and height schematized 
+        //since each element on form will be represented by rectangle,
+        //there are cords of upper right corner, widht and height fields 
         public abstract int X { get; set; }
         public abstract int Y { get; set; }
         public abstract int Width { get; set; }
@@ -25,8 +26,6 @@ namespace Engineering_Calculator
         public bool checkPoint(int px, int py)
         {
             return (px > X && py > Y) && (px < X + Width && py < Y + Height) ? true : false;
-
         }
-
     }
 }

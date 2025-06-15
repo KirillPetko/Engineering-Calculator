@@ -1,6 +1,6 @@
 ﻿namespace Engineering_Calculator
 {
-    partial class Form1
+    partial class CalculatorForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,21 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CalculatorForm));
             this.SuspendLayout();
             // 
-            // Form1
+            // CalculatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "CalculatorForm";
             this.Text = "Engineering Calculator";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
+            this.Load += new System.EventHandler(this.CalculatorForm_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.CalculatorForm_Paint);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CalculatorForm_KeyDown);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CalculatorForm_MouseClick);
             this.ResumeLayout(false);
 
         }

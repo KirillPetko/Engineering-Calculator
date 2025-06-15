@@ -27,6 +27,28 @@ namespace Engineering_Calculator
         private string input;
         private double result;
         private bool isValid;
+        private static Dictionary<string, string> sequences = new Dictionary<string, string>
+        {
+            //sequences of type:
+            ["sci-number"] = "^(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?$", //fractional number, or in sientific notation
+            ["number"] = "(\\-)?\\d+[\\.?\\d]*", //fractional number
+            ["pos-number"] = "\\d+[\\.?\\d]*", //positive fractional number
+            ["arc-trigonometry"] = "(asin|acos|atan)(\\-)?\\d+[\\.?\\d]*", //asin-3 or acos90 (single operation)
+            ["trigonometry"] = "(sin|cos|tan|ln|log|sqrt)(\\-)?\\d+[\\.?\\d]*", //sin-3 or cos90 (single operation)
+            ["neg-arg-and-power"] = "\\d+[\\.?\\d]*\\-\\^\\-(\\d+[\\.?\\d]*\\-\\^\\-)*\\d+[\\.?\\d]*", //3-^-2-^-4...-^-0.3
+            ["pos-arg-neg-power"] = "\\d+[\\.?\\d]*(\\^\\-|\\-\\^)(\\d+[\\.?\\d]*(\\^\\-|\\-\\^))*\\d+[\\.?\\d]*", //3^-2^-0.4...^-3 
+            ["pos-arg-pos-power"] = "\\d+[\\.?\\d]*\\^(\\d+[\\.?\\d]*\\^)*\\d+[\\.?\\d]*", //3^2^0.4...^3 
+            ["mul-div-neg-arg"] = "\\d+[\\.?\\d]*(\\*\\-|\\/\\-)(\\d+[\\.?\\d]*(\\*\\-|\\/\\-))*\\d+[\\.?\\d]*", //7/-6*-0.03*-.../-123          
+            ["mul-div-pos-arg"] = "\\d+[\\.?\\d]*[\\*|\\/](\\d+[\\.?\\d]*[\\*|\\/])*\\d+[\\.?\\d]*", //7/6*0.03*.../123           
+            ["add-sub"] = "\\d+[\\.?\\d]*[\\+|\\-](\\d+[\\.?\\d]*[\\+|\\-])*\\d+[\\.?\\d]*", //3+2-3+8.3-...+9
+            //one sign operations
+            ["one-sign-opr"] = "\\*|\\/|\\+|\\-|\\^",
+            ["two-sign-opr"] = "(\\^\\-)|(\\-\\^)|(\\*\\-)|(\\/\\-)",
+            ["three-sign-opr"] = "\\-\\^\\-",
+            ["math-opr"] = "sin|cos|tan|ln|log|sqrt",
+            ["arc-trigonometry-opr"] = "asin|acos|atan",
+            ["all-math-opr"] = "sin|cos|tan|asin|acos|atan|ln|log|sqrt",
+        };
 
         public string Input 
         {
@@ -69,19 +91,18 @@ namespace Engineering_Calculator
         {
             if (expression == String.Empty) return false;
 
-            Regex number = new Regex("\\d+[\\.?\\d]*");
-            Regex signOperation = new Regex("\\*|\\/|\\+|\\-|\\^");
-            Regex textOperation = new Regex("sin|cos|tan|asin|acos|atan|ln|log|sqrt");
+            Regex number = new Regex(sequences["pos-number"]);
+            Regex signOperation = new Regex(sequences["one-sign-opr"]);
+            Regex textOperation = new Regex(sequences["all-math-opr"]);
 
             string word = "";
-            int wordType = 0;                          //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - parentesis "(.." 5 - "..)"
-            int charType = 0;                          //0 - not assigned 1 - digit  2 - sign 3 - letter 4 - parentesis '(' 5 - ')'
+            int wordType = 0;   //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - bracket "(.." 5 - "..)"
+            int charType = 0;   //0 - not assigned 1 - digit 2 - sign 3 - letter 4 - parentesis '(' 5 - ')'
             char c = expression[0];
             int openedBracketsCount = 0;
             int closedBracketsCount = 0;
 
-
-            if (c == '*' || c == '/' || c == '+' || c == '^' || c == ')')
+            if (!Char.IsLetter(c) && !Char.IsDigit(c) && c != '-' && c != '(') 
                 return false;
             for (int i = 0; i < expression.Length; i++)
             {
@@ -89,7 +110,8 @@ namespace Engineering_Calculator
                 if (c == '(') openedBracketsCount++;
                 if (c == ')') closedBracketsCount++;
 
-                if (wordType == 0)                      //word is not yet assigned 
+                //word is not yet assigned 
+                if (wordType == 0)                      
                 {
                     if (Char.IsDigit(c) || c == '.') wordType = 1;
                     else if (c == '*' || c == '/' || c == '+' || c == '-' || c == '^') wordType = 2;
@@ -99,7 +121,11 @@ namespace Engineering_Calculator
                     else return false;
 
                     word += c;
-                    i++;
+                    //false was not returned yet and the end of expression reached - it must be a single number
+                    if (i == expression.Length - 1)
+                        return true;
+                    else
+                        i++;
                     c = expression[i];
                 }
                 if (Char.IsDigit(c) || c == '.') charType = 1;
@@ -116,11 +142,11 @@ namespace Engineering_Calculator
                         word += c;
                         break;
                     case (1, 2):
-                        if (!number.IsMatch(word))        //met operation - check word
+                        if (!number.IsMatch(word)) //met operation - check word
                             return false;
-                        wordType = 2;                    //change word type to new one
-                        word = "";                       //clear word
-                        word += c;                       //add 1st letter to the new word
+                        wordType = 2;              //change word type to new one
+                        word = "";                 //clear word
+                        word += c;                 //add 1st letter to the new word
                         break;
                     case (1, 3):
                         if (!number.IsMatch(word))
@@ -141,7 +167,7 @@ namespace Engineering_Calculator
                         word = "";
                         word += c;
                         break;
-                    case (2, 2): return false;      //sign can only be one -> this case means it contents more than 1 letter(previous assign of word to sign type) -> Invalid expression
+                    case (2, 2): return false;      //this case means sign contents more than 1 letter
                     case (2, 3):
                         if (!signOperation.IsMatch(word))
                             return false;
@@ -158,7 +184,7 @@ namespace Engineering_Calculator
                     case (3, 3):
                         word += c;
                         break;
-                    case (3, 1): return false;      //after text opreation is only opened parentesis '(' -> char type 4
+                    case (3, 1): return false;      //after text opreation only opened bracket (char type 4)
                     case (3, 2): return false;
                     case (3, 4):
                         wordType = 4;
@@ -171,9 +197,9 @@ namespace Engineering_Calculator
                         word += c;
                         break;
                     case (4, 2):
-                        if (c != '-') return false; // any sign after '(' exept '-' -> Invalid expression
+                        if (c != '-') return false; //any sign after '(' exept '-' -> Invalid expression
                         break;
-                    case (4, 3):                    //no need to check word type for parentesises
+                    case (4, 3):                    //no need to check word type for parenteses
                         wordType = 3;
                         word = "";
                         word += c;
@@ -192,7 +218,7 @@ namespace Engineering_Calculator
                     default: return false;
                 }
             }
-            switch (wordType)                       //last word check switch (what can be last word has a break- operator)
+            switch (wordType)                       //last word check (valid cases have a break operator)
             {
                 case 0: return false;
                 case 1:
@@ -209,99 +235,120 @@ namespace Engineering_Calculator
             return true;
         }
 
-        //function which takes a string in form of expression, then open brackets, taking inner string as argument to genereted recurrent entrance of itself
-        //then it divides expression in sequences with priorities of operations while callcucating them sequentially with the help of overloaded examples of itself
-        //it also adds 0 in the beginning not to break further calculation process as well as checking validity of gotten result before returning it, otherwise this function throws
-        //an exeption or continues by recurrent enter untill expression becomes a double-pasable string, then it returns a result of that pasing
+        /*
+        * function which takes a string in form of expression, then open brackets,
+         * taking inner string as argument to genereted recurrent entrance of itself
+         * then it divides expression in sequences with priorities of operations while
+         * callcucating them sequentially with the help of overloaded examples of itself
+         * it also adds 0 in the beginning not to break further calculation process as well
+         * as checking validity of gotten result before returning it, otherwise this function 
+         * throws an exeption or continues by recurrent enter untill expression
+         * becomes a double-passable string, then it returns a result of that pasing 
+         */
         static double Calculate(string expression)
         {
             double result;
-            List<int> openedBracketIndexes = new List<int>();
-            for (int i = 0; i < expression.Length; i++)                                                                                     //cycle to iterate over characters in order to
-            {                                                                                                                               //open '(' ')' each corresponding bracket pair
 
-                string subexpressionWithBrackets;
-                string subexpression;
-                double subresult;
-                if (i < expression.Length - 1)                                                                                              //[i+1] shold not be out of range of string
+                
+            List<int> openedBracketsIndexes = new List<int>();
+            for (int i = 0; i < expression.Length; i++)//iterate over chars to find each corresponding bracket 
+            {                                          //pair then hand expression over bracket opening function
+                if (i < expression.Length - 1)         //[i+1] shold not be out of range of string
                 {
                     if (expression[i] == '(')
-                        openedBracketIndexes.Add(i);
+                        openedBracketsIndexes.Add(i);
                     else if (expression[i] == ')' && expression[i + 1] == '^')
                     {
-                        subexpressionWithBrackets = expression.Substring(openedBracketIndexes.Last(), i + 1 - openedBracketIndexes.Last());       //[^1] means last item of the list index
-                        subexpression = Regex.Replace(subexpressionWithBrackets, "\\(|\\)", "");                                            //Escapes a minimal set of characters(Regex.Escape)
-                        Regex subexpBrackets = new Regex(Regex.Escape(subexpressionWithBrackets));                                          //(\, *, +, ?, |, {, [, (,), ^, $, ., #, .,  
-                        i = openedBracketIndexes.Last();                                                                                       //space)by replacing them with their escape codes
-                        subresult = Calculate(subexpression);                                                                               //Made for cases like (-2)^(-2), to 
-                        if (subresult < 0)                                                                                                  //avoid sequences like 2-^2-. (*)
-                            expression = subexpBrackets.Replace(expression, Convert.ToString(-1 * subresult) + '-', 1);                     //replacing first match of escaped subexpressionWithBrackets
-                        else                                                                                                                //in expression  changing '-' position to after number
-                            expression = expression.Replace(subexpressionWithBrackets, Convert.ToString(subresult));                        //(*) when there is no raise power operations
-                                                                                                                                            //with negative arguments replacing all same
-                        expression = expression.Replace(',', '.');                                                                          //expressions in brackets with single calculated                                                
-                        openedBracketIndexes.RemoveAt(openedBracketIndexes.Count - 1);                                                      //result is acceptable 
+                        expression = Calculate(expression, openedBracketsIndexes, i, true);
+                        i = openedBracketsIndexes.Last();
+                        openedBracketsIndexes.RemoveAt(openedBracketsIndexes.Count - 1);                                                  
                     }
                     else if (expression[i] == ')' && expression[i + 1] != '^')
                     {
-
-                        subexpressionWithBrackets = expression.Substring(openedBracketIndexes.Last(), i + 1 - openedBracketIndexes.Last());
-                        subexpression = Regex.Replace(subexpressionWithBrackets, "\\(|\\)", "");
-                        i = openedBracketIndexes.Last();
-                        expression = expression.Replace(subexpressionWithBrackets, Convert.ToString(Calculate(subexpression)));
-                        expression = expression.Replace(',', '.');
-                        openedBracketIndexes.RemoveAt(openedBracketIndexes.Count - 1);
-
+                        expression = Calculate(expression, openedBracketsIndexes, i, false);
+                        i = openedBracketsIndexes.Last();
+                        openedBracketsIndexes.RemoveAt(openedBracketsIndexes.Count - 1);
                     }
 
                 }
-                else                                                                                                                //if '(' is met at the end of the expression string
+                else //')' is at the end of the expression
                 {
                     if (expression[i] == ')')
                     {
-                        subexpressionWithBrackets = expression.Substring(openedBracketIndexes.Last(), i + 1 - openedBracketIndexes.Last());
-                        subexpression = Regex.Replace(subexpressionWithBrackets, "\\(|\\)", "");
-                        i = openedBracketIndexes.Last();
-                        expression = expression.Replace(subexpressionWithBrackets, Convert.ToString(Calculate(subexpression)));
-                        expression = expression.Replace(',', '.');
-                        openedBracketIndexes.RemoveAt(openedBracketIndexes.Count - 1);
+                        expression = Calculate(expression, openedBracketsIndexes, i, false);
+                        i = openedBracketsIndexes.Last();
+                        openedBracketsIndexes.RemoveAt(openedBracketsIndexes.Count - 1);
                     }
                 }
             }
 
-            if (expression[0] == '-') expression = "0" + expression;                                                                //0 is inserted to insure proper calculation of sequence
-                                                                                                                                    // sequences of type:
-            expression = Calculate("(asin|acos|atan)(\\-)?\\d+[\\.?\\d]*", expression, 4);                                          // asin-3 or acos90 (just a single operation)                                                                              
-            expression = Calculate("(sin|cos|tan|ln|log|sqrt)(\\-)?\\d+[\\.?\\d]*", expression, 3);                                      // sin-3 or cos90   (just a single operation)
-            expression = Calculate("\\d+[\\.?\\d]*\\-\\^\\-(\\d+[\\.?\\d]*\\-\\^\\-)*\\d+[\\.?\\d]*", expression, 2);               // 3-^-2-^-4...-^-0.3
-            expression = Calculate("\\d+[\\.?\\d]*(\\^\\-|\\-\\^)(\\d+[\\.?\\d]*(\\^\\-|\\-\\^))*\\d+[\\.?\\d]*", expression, 1);   // 3^-2^-0.4...^-3 
-            expression = Calculate("\\d+[\\.?\\d]*\\^(\\d+[\\.?\\d]*\\^)*\\d+[\\.?\\d]*", expression, 0);                           // 3^2^0.4...^3 
-            expression = Calculate("\\d+[\\.?\\d]*(\\*\\-|\\/\\-)(\\d+[\\.?\\d]*(\\*\\-|\\/\\-))*\\d+[\\.?\\d]*", expression, 1);   // 7/-6*-0.03*-.../-123
-            expression = Calculate("\\d+[\\.?\\d]*[\\*|\\/](\\d+[\\.?\\d]*[\\*|\\/])*\\d+[\\.?\\d]*", expression, 0);               // 7/6*0.03*.../123 
+            //0 is inserted to insure proper calculation of sequence
+            if (expression[0] == '-') expression = "0" + expression;                                                                
+  
+            expression = Calculate(sequences["arc-trigonometry"], expression, 4);                                                                                                                    
+            expression = Calculate(sequences["trigonometry"], expression, 3);                                 
+            expression = Calculate(sequences["neg-arg-and-power"], expression, 2);               
+            expression = Calculate(sequences["pos-arg-neg-power"], expression, 1);   
+            expression = Calculate(sequences["pos-arg-pos-power"], expression, 0);                           
+            expression = Calculate(sequences["mul-div-neg-arg"], expression, 1);   
+            expression = Calculate(sequences["mul-div-pos-arg"], expression, 0);
 
-            expression = expression.Replace("++", "+");                                                                             //sequences of such type (3++3--2+-3...)
-            expression = expression.Replace("--", "+");                                                                             //may be just replaced by ones with one sign
-            expression = expression.Replace("+-", "-");                                                                             //instead of calculation
+            //sequences of type (3++3--2+-3...) may be just replaced with one sign
+            expression = expression.Replace("++", "+");                                                                             
+            expression = expression.Replace("--", "+");                                                                           
+            expression = expression.Replace("+-", "-");                                                                            
             expression = expression.Replace("-+", "-");
 
             if (expression[0] == '-') expression = "0" + expression;
 
-            expression = Calculate("\\d+[\\.?\\d]*[\\+|\\-](\\d+[\\.?\\d]*[\\+|\\-])*\\d+[\\.?\\d]*", expression, 0);               // 3+2-3+8.3-...+9
-                                                                                                                                    //regex defining fractional number with sign
-            string number = "^(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?$";                                                             //(^ and $ means only what is between them)
-                                                                                                                                    //also defining nums like 2.5600000000000013E-06
+            expression = Calculate(sequences["add-sub"], expression, 0);
 
-            if (expression == "NaN")                                                                                                //if result is not defined (like acos(2))
-                throw new Exception("NaN value");
-            else if (expression == "Infinity")                                                                                      //if result is infinity (1/0)
-                throw new Exception("Infinity");
-            if (Regex.IsMatch(expression, number, RegexOptions.IgnoreCase))
-                result = Double.Parse(expression, CultureInfo.InvariantCulture);
+            if (expression.Contains("NaN"))                                                                                         
+                throw new ArithmeticException("NaN value");    
+            else if (expression.Contains("Infinity"))                                                                               
+                throw new ArithmeticException("Infinity");                                                                                                                                           
+            if (Regex.IsMatch(expression, sequences["sci-number"], RegexOptions.IgnoreCase))
+                result = Double.Parse(expression, CultureInfo.InvariantCulture); 
             else
                 result = Calculate(expression);
             return result;
         }
-        //functiom which finds sequences in input string by specified pattern argument
+
+        //opens corresponding bracket pair in expression calculating inner expression,
+        //considering power operation after to avoid broken sequences
+        static string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
+        {
+            double subresult;
+            Regex subexpBrackets;
+            int subexpLength = i + 1 - openedBracketsIndexes.Last();
+            string subexpressionWithBrackets = expression.Substring(openedBracketsIndexes.Last(), subexpLength),
+                   subexpression = Regex.Replace(subexpressionWithBrackets, "\\(|\\)", String.Empty),
+                   replacement, resultStr;
+            if (isPower)
+            {
+                subexpBrackets = new Regex(Regex.Escape(subexpressionWithBrackets)); //Escaping a minimal set of characters                                                                                                                        
+                subresult = Calculate(subexpression);                                //is made for cases like (-2)^(-2),                                                  
+                if (subresult < 0)                                                   //to avoid sequences like 2-^2-. (*)
+                {                                                                    //replacing first match of escaped
+                    replacement = Convert.ToString(-1 * subresult) + '-';            //subexpressionWithBrackets
+                    expression = subexpBrackets.Replace(expression, replacement, 1); //in expression changing '-' position 
+                }                                                                    //to after-number.
+                else
+                {
+                    resultStr = Convert.ToString(subresult);
+                    expression = expression.Replace(subexpressionWithBrackets, resultStr);
+                }                                                                    //(*) when there are no raise to power
+            }                                                                        //operations with negative arguments    
+            else                                                                     //replacing all same expressions in     
+            {                                                                        //brackets with single calculated result    
+                resultStr = Convert.ToString(Calculate(subexpression));              //is acceptable    
+                expression = expression.Replace(subexpressionWithBrackets, resultStr);
+            }
+            expression = expression.Replace(',', '.');
+            return expression;
+        }
+
+        //finds sequences in input string by specified pattern argument
         static string Calculate(string sequenceStr, string expression, int operationType)
         {
             Regex sequence = new Regex(sequenceStr);
@@ -311,10 +358,10 @@ namespace Engineering_Calculator
             return expression;
         }
 
-        //function which calculates sequenses of same priority replacing them with fractional number represented in a string 
+        //calculates sequenses of same priority replacing them with fractional number represented in a string
         static string Calculate(Match seqence, int operationType)
         {
-            Regex number = new Regex("\\d+[\\.?\\d]*");                                        //regex for any double number without sign before it
+            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos-sci number)
             MatchCollection numbers;
             double result;
             string resultS;
@@ -322,21 +369,21 @@ namespace Engineering_Calculator
             switch (operationType)
             {
                 case 0:
-                    operation = new Regex("\\*|\\/|\\+|\\-|\\^");
+                    operation = new Regex(sequences["one-sign-opr"]);
                     break;
                 case 1:
-                    operation = new Regex("(\\^\\-)|(\\-\\^)|(\\*\\-)|(\\/\\-)");
+                    operation = new Regex(sequences["two-sign-opr"]);
                     break;
                 case 2:
-                    operation = new Regex("\\-\\^\\-");
+                    operation = new Regex(sequences["three-sign-opr"]);
                     break;
                 case 3:
-                    operation = new Regex("sin|cos|tan|ln|log|sqrt");
-                    number = new Regex("(\\-)?\\d+[\\.?\\d]*");                                    //argument of text function may be negative (sin-3 or sqrt-4 sequences as an example)
-                    break;
+                    operation = new Regex(sequences["math-opr"]);
+                    number = new Regex(sequences["number"]); //argument of function may be negative 
+                    break;                                   //(like sin-3 or sqrt-4 sequences)
                 case 4:
-                    operation = new Regex("asin|acos|atan");
-                    number = new Regex("(\\-)?\\d+[\\.?\\d]*");
+                    operation = new Regex(sequences["arc-trigonometry-opr"]);
+                    number = new Regex(sequences["number"]);
                     break;
                 default:
                     throw new ArgumentException();
@@ -347,14 +394,15 @@ namespace Engineering_Calculator
             if (operationType != 3 && operationType != 4)
             {
                 MatchCollection operations = operation.Matches(seqence.Value);
-                result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture);              //result of each sequence of operations with same priority is formed by
-                for (int i = 0; i < operations.Count; i++)                                          //performing this operation with previous result, forming new value to
-                {                                                                                   //perform this operation again on the next step, untill sequence is not
-                    double x = Double.Parse(numbers[i + 1].Value, CultureInfo.InvariantCulture);    //calculated completely, then result is returned to change the sequence
-                    result = Calculate(result, x, operations[i].Value);                             //in expression
-                }
-
-            }                                                                                       //if operation is trigonometry one -> return result of that single operation
+                result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture);          //result of each sequence of operations 
+                for (int i = 0; i < operations.Count; i++)                                      //with same priority is formed by  
+                {                                                                               //performing this operation with previous  
+                    double x = Double.Parse(numbers[i + 1].Value, CultureInfo.InvariantCulture);//result, forming new value to perform 
+                    result = Calculate(result, x, operations[i].Value);                         //this operation again on the next step,  
+                }                                                                               //untill sequence is not calculated  
+                                                                                                //completely, then result is returned 
+            }                                                                                   //to replace the sequence in expression    
+            //operation is trigonometry one -> return result of that single operation
             else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(seqence.Value).Value);
 
             resultS = Convert.ToString(result, CultureInfo.InvariantCulture);
@@ -362,7 +410,8 @@ namespace Engineering_Calculator
             return resultS;
 
         }
-        //function which performs mathematical operation between two fractional numbers
+
+        //performs mathematical operation between two fractional numbers
         static double Calculate(double x, double y, string operation)
         {
             switch (operation)
@@ -414,7 +463,7 @@ namespace Engineering_Calculator
                 case "sqrt":
                     return Math.Sqrt(x);
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Such operation has not been implemented!");
 
             }
 
