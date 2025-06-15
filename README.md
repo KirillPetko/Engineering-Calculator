@@ -14,4 +14,4 @@
 You can type text to calulator's input with any button, if its KeyDown() event was implemented.<br />
 Any letters, numbers, or operation symbols. Backspace deletes one symbol, DEL clears input field.<br />
 If any exeption message, or "Invalid expression" message appears, proceed to clear input field by<br />
-DEL button on your keyboard or 'C' button on on GUI.
+DEL button on your keyboard or 'C' button on GUI.
