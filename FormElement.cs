@@ -23,7 +23,7 @@ namespace Engineering_Calculator
         public abstract int Height { get; set; }
         public abstract string Caption { get; set; }
         public abstract void Draw(Graphics g);
-        public bool checkPoint(int px, int py)
+        public bool CheckPoint(int px, int py)
         {
             return (px > X && py > Y) && (px < X + Width && py < Y + Height) ? true : false;
         }

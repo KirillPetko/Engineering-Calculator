@@ -16,13 +16,34 @@ namespace Engineering_Calculator
         {
             result = String.Empty;
             key = String.Empty;
+            isLocked = false;
             temp = 0;
+
+            exHandler = new ExceptionHandler();
+            exHandler.AddObserver(new ErrorLogger());
+            exHandler.AddObserver(new UserNotification());
         }
+
+        public UserInputHandler(FormElement _textField)
+        {
+            result = String.Empty;
+            key = String.Empty;
+            isLocked = false;
+            temp = 0;
+            textField = _textField;
+
+            exHandler = new ExceptionHandler();
+            exHandler.AddObserver(new ErrorLogger());
+            exHandler.AddObserver(new UserNotification(textField));
+        }
+
 
         //fields
         private int temp;
         private string result, key;
         private bool isLocked;
+        private FormElement textField;
+        private readonly ExceptionHandler exHandler;
 
         public bool IsLocked
         {
@@ -39,7 +60,7 @@ namespace Engineering_Calculator
         //methods
 
         //adds string to caption
-        public void addToCaption(string addition, Graphics g, FormElement textField)
+        public void AddToCaption(string addition, Graphics g)
         {
             if (textField != null)
             {
@@ -51,7 +72,7 @@ namespace Engineering_Calculator
         }
 
         //subtracts one symbol from textField's caption
-        public void subtractFromCaption(Graphics g, FormElement textField)
+        public void SubtractFromCaption(Graphics g)
         {
             if (textField.Caption != String.Empty)
             {
@@ -61,38 +82,39 @@ namespace Engineering_Calculator
             }
         }
 
-        //passes textField.Caption to Calculation() instance, then changes caption of 
-        //text field depending on result of Calculate() function (result string or exeption message)
-        //lockes if catches exeption or invalid expression message, displaying related message 
-        public void calculateCaption(Graphics g, FormElement textField, Calculation calculation)
+        //changes caption of text field depending on result of Calculate() 
+        //function (result string or exeption message), lockes if catches 
+        //exeption or invalid expression message, displaying related message 
+        public void CalculateCaption(Graphics g, Calculation calc)
         {
             //in case of any non-implemented exeption display it in English
             System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
             try
             {
-                calculation = new Calculation(textField.Caption);
-                if (calculation.IsValid)
+                calc = new Calculation(textField.Caption);
+                if (calc.IsValid)
                 {
-                    result = Convert.ToString(calculation.Result);
+                    result = Convert.ToString(calc.Result);
                     result = result.Replace(",", ".");
                     textField.Caption = result;
                 }
                 else
                 { 
-                    textField.Caption = "Invalid expression";
+                    textField.Caption = "Invalid input";
                     isLocked = true;
                 } 
             }
             catch (Exception ex) 
-            {                     
-                textField.Caption = ex.Message;
+            {   
+                //textField.Caption = ex.Message;
+                exHandler.HandleException(ex);
                 isLocked = true;
             }
             textField.Draw(g);
         }
 
         //clears caption of textField, and unlocks itself (UserInputHandler() instance)
-        public void clearCaption(Graphics g, FormElement textField)
+        public void ClearCaption(Graphics g)
         {
             if (textField.Caption != String.Empty)
             {
@@ -102,25 +124,25 @@ namespace Engineering_Calculator
             }
         }
 
-        //handles input with pressed shift button (on-pressed-shift implementation in CalculatorForm.cs)
-        public void onPressedShiftInputHandler(Graphics g, KeyEventArgs e, FormElement textField)
+        //handles input with pressed shift button (implementation in CalculatorCore.cs)
+        public void HandleShiftPressed(Graphics g, KeyEventArgs e, FormElement textField)
         {
             switch (e.KeyCode)
             {
                 case Keys.D6:
-                    addToCaption("^", g, textField);
+                    AddToCaption("^", g);
                     break;
                 case Keys.D8:
-                    addToCaption("*", g, textField);
+                    AddToCaption("*", g);
                     break;
                 case Keys.D9:
-                    addToCaption("(", g, textField);
+                    AddToCaption("(", g);
                     break;
                 case Keys.D0:
-                    addToCaption(")", g, textField);
+                    AddToCaption(")", g);
                     break;
                 case Keys.Oemplus:
-                    addToCaption("+", g, textField);
+                    AddToCaption("+", g);
                     break;
                 default:
                     break;
@@ -128,30 +150,30 @@ namespace Engineering_Calculator
         }
 
         //handles numpad operation keys pool
-        public void numpadOperationInputHandler(Graphics g, KeyEventArgs e, FormElement textField)
+        public void HandleNumpadOperations(Graphics g, KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.Add:
-                    addToCaption("+", g, textField);
+                    AddToCaption("+", g);
                     break;
                 case Keys.Subtract:
-                    addToCaption("-", g, textField);
+                    AddToCaption("-", g);
                     break;
                 case Keys.Multiply:
-                    addToCaption("*", g, textField);
+                    AddToCaption("*", g);
                     break;
                 case Keys.Divide:
-                    addToCaption("/", g, textField);
+                    AddToCaption("/", g);
                     break;
                 default:
                     break;
             }
         }
 
-        //handles most input keys pressed down by calling  
-        //corresponding handler functions with specific arguments
-        public void majorityKeysInputHandler(Graphics g, KeyEventArgs e, FormElement textField)
+        //handles most keys pressed down by calling  
+        //corresponding functions with specific arguments
+        public void HandleMajorityKeys(Graphics g, KeyEventArgs e)
         {
             bool lettersKeyPool = e.KeyCode >= Keys.A && e.KeyCode <= Keys.Z,
                  numbersKeyPool = e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9,
@@ -159,105 +181,103 @@ namespace Engineering_Calculator
                  numpadOprKeyPool = e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract
                               || e.KeyCode == Keys.Multiply || e.KeyCode == Keys.Divide;
             if (e.Shift)
-                onPressedShiftInputHandler(g, e, textField);
+                HandleShiftPressed(g, e, textField);
             else
             {
                 if (lettersKeyPool)
-                    addToCaption(e.KeyCode.ToString().ToLower(), g, textField);
+                    AddToCaption(e.KeyCode.ToString().ToLower(), g);
                 if (numpadKeyPool)
-                    addToCaption(e.KeyCode.ToString().Replace("NumPad", String.Empty), g, textField);
+                    AddToCaption(e.KeyCode.ToString().Replace("NumPad", String.Empty), g);
                 if (numpadOprKeyPool)
-                    numpadOperationInputHandler(g, e, textField);
+                    HandleNumpadOperations(g, e);
                 if (numbersKeyPool)
                 {
                     key = e.KeyCode.ToString();
                     key = key.Trim('D');
-                    addToCaption(key, g, textField);
+                    AddToCaption(key, g);
                 }
                 if (e.KeyCode == Keys.OemMinus)
-                    addToCaption("-", g, textField);
+                    AddToCaption("-", g);
                 if (e.KeyCode == Keys.OemQuestion || e.KeyCode == Keys.Oem5)
-                    addToCaption("/", g, textField);
+                    AddToCaption("/", g);
                 if (e.KeyCode == Keys.OemPeriod)
-                    addToCaption(".", g, textField);
+                    AddToCaption(".", g);
                 if (e.KeyCode == Keys.Delete)
                 {
                     textField.Caption = String.Empty;
                     textField.Draw(g);
                 }
             }
-
         }
 
         //implements form click event by calling corresponding
         //handler functions with specific arguments
-        public void buttonClickHandler(Graphics g, FormElement button, FormElement textField, Calculation calculation)
+        public void HandleButtonClick(Graphics g, FormElement button,  Calculation calc)
         {
             switch (button.Caption)
             {
                 case "C":
-                    clearCaption(g, textField);
+                    ClearCaption(g);
                     break;
                 case "<-":
-                    subtractFromCaption(g, textField);
+                    SubtractFromCaption(g);
                     break;
                 case "Pi":
-                    addToCaption("3.141592", g, textField);
+                    AddToCaption("3.141592", g);
                     break;
                 case "e":
-                    addToCaption("2.71828", g, textField);
+                    AddToCaption("2.71828", g);
                     break;
                 case "sin":
-                    addToCaption("sin(", g, textField);
+                    AddToCaption("sin(", g);
                     break;
                 case "cos":
-                    addToCaption("cos(", g, textField);
+                    AddToCaption("cos(", g);
                     break;
                 case "tan":
-                    addToCaption("tan(", g, textField);
+                    AddToCaption("tan(", g);
                     break;
                 case "asin":
-                    addToCaption("asin(", g, textField);
+                    AddToCaption("asin(", g);
                     break;
                 case "acos":
-                    addToCaption("acos(", g, textField);
+                    AddToCaption("acos(", g);
                     break;
                 case "atan":
-                    addToCaption("atan(", g, textField);
+                    AddToCaption("atan(", g);
                     break;
                 case "ln":
-                    addToCaption("ln(", g, textField);
+                    AddToCaption("ln(", g);
                     break;
                 case "log":
-                    addToCaption("log(", g, textField);
+                    AddToCaption("log(", g);
                     break;
                 case "sqrt":
-                    addToCaption("sqrt(", g, textField);
+                    AddToCaption("sqrt(", g);
                     break;
                 case "=":
-                    calculateCaption(g, textField, calculation);
+                    CalculateCaption(g, calc);
                     break;
                 default:
-                    addToCaption(button.Caption, g, textField);
+                    AddToCaption(button.Caption, g);
                     break;
             }
-
         }
 
-        //implements input keys pressed down event by calling  
+        //implements expression keys pressed down event by calling  
         //corresponding handler functions with specific arguments
-        public void keyDownHandler(Graphics g, KeyEventArgs e, FormElement textField, Calculation calculation)
+        public void HandleKeyDown(Graphics g, KeyEventArgs e, Calculation calc)
         {
             switch (e.KeyCode)
             {
                 case Keys.Enter:
-                    calculateCaption(g, textField, calculation);
+                    CalculateCaption(g, calc);
                     break;
                 case Keys.Back:
-                    subtractFromCaption(g, textField);
+                    SubtractFromCaption(g);
                     break;
                 default:
-                    majorityKeysInputHandler(g, e, textField);
+                    HandleMajorityKeys(g, e);
                     break;
             }
         }

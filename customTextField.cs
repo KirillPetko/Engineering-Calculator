@@ -10,10 +10,10 @@ using System.Text.RegularExpressions;
 
 namespace Engineering_Calculator
 {
-    //class responsible for graphical representation of a custom text field on form
-    internal class customTextField:FormElement
+    //class responsible for graphical representation of a custom text field
+    internal class CustomTextField:FormElement
     {
-        public customTextField() 
+        public CustomTextField() 
         {
             x = 50;
             y = 50;
@@ -21,7 +21,7 @@ namespace Engineering_Calculator
             height = 50;
             caption = String.Empty;
         }
-        public customTextField(int _x, int _y, int _width, int _height, string _caption)
+        public CustomTextField(int _x, int _y, int _width, int _height, string _caption)
         {
             x = _x;
             y = _y;
@@ -100,23 +100,34 @@ namespace Engineering_Calculator
                 caption = value;
             }
         }
+
         public override void Draw(Graphics g)
         {
-            Rectangle rect = new Rectangle(X, Y, Width, Height);
-            Brush brush = new SolidBrush(Color.Black);
-            g.FillRectangle(brush, rect);
-            Brush brush1 = new SolidBrush(Color.Orange);
+            Rectangle rect;
+            Brush brush;
+            Brush brush1;
+            Font fnt;
 
-            //Font with even character length
-            Font fnt = new System.Drawing.Font("Consolas", (float)20);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+            rect = new Rectangle(X, Y, Width, Height);
+            brush = new SolidBrush(Color.Black);
+            brush1 = new SolidBrush(Color.Orange);
+            fnt = new System.Drawing.Font("Consolas", (float)20);//even character length
+
+            g.FillRectangle(brush, rect);
             if (Caption.Length <= 43)
                 g.DrawString(Caption, fnt, brush1, x + 10, y + 5);
-            else 
+            else
             {
                 string visibleCaption = Caption;
-                visibleCaption = visibleCaption.Substring(visibleCaption.Length-43);
+                visibleCaption = visibleCaption.Substring(visibleCaption.Length - 43);
                 g.DrawString(visibleCaption, fnt, brush1, x + 10, y + 5);
             }
+            fnt.Dispose();
+            brush.Dispose();
+            brush1.Dispose();
         }
     }
 }

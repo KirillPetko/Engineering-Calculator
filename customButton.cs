@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Engineering_Calculator
 {
-   //class responsible for visual representation of a custom button on form
-    internal class customButton:FormElement
+   //class responsible for visual representation of a custom button
+    internal class CustomButton:FormElement
     {
-        public customButton()
+        public CustomButton()
         {
             x = 0;
             y = 0;
@@ -18,7 +18,7 @@ namespace Engineering_Calculator
             height = 0;
             caption = string.Empty;
         }
-        public customButton(int _x, int _y, int _width, int _height, string _caption) 
+        public CustomButton(int _x, int _y, int _width, int _height, string _caption) 
         { 
             x = _x;
             y = _y;
@@ -26,6 +26,7 @@ namespace Engineering_Calculator
             height = _height;
             caption = _caption;
         }
+
         private int x;
         private int y;
         private int width;
@@ -100,22 +101,22 @@ namespace Engineering_Calculator
 
             }
         }
-        
+
         public override void Draw(Graphics g)
         {
+            Rectangle border;
             Brush brush;
             Font fnt;
             Pen pen;
+
             if (caption == "C" || caption == "<-")
                 brush = new SolidBrush(Color.Red);
             else
                 brush = new SolidBrush(Color.Black);
             fnt = new System.Drawing.Font("SansSerif", (float)15);
-
-            //borders
             pen = new Pen(Color.Black, 1);
-            Rectangle rect = new Rectangle(X, Y, Width, Height);
-            g.DrawRectangle(pen, rect);
+            border = new Rectangle(X, Y, Width, Height);
+            g.DrawRectangle(pen, border);
 
             //centring caption in button rectangle by caption length
             if (caption.Length == 1) 
@@ -126,6 +127,10 @@ namespace Engineering_Calculator
                 g.DrawString(caption, fnt, brush, x + 20, y + 25);
             else if(caption.Length == 4)
                 g.DrawString(caption, fnt, brush, x + 15, y + 25);
+
+            brush.Dispose();
+            fnt.Dispose();
+            pen.Dispose();
         }
     }
 }
