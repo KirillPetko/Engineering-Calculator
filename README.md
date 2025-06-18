@@ -14,4 +14,10 @@
 You can type text to calulator's input with any button, if its KeyDown() event was implemented.<br />
 Any letters, numbers, or operation symbols. Backspace deletes one symbol, DEL clears input field.<br />
 If any exeption message, or "Invalid expression" message appears, proceed to clear input field by<br />
-DEL button on your keyboard or 'C' button on GUI.
+DEL button on your keyboard or 'C' button on GUI.<br/ >
+<strong>Exeption types</strong><br />
+1.<p style="color:orange">Invalid input</p> - input expression does not correspond to rules described above.<br />
+2.<p style="color:orange">Wrong operands format</p> - means that on or more operands in expression acquired a sientific notation in process of calculation (double operand has more than fifteen digits).Note that expression after calculation has only obe such number it will be displayed as result.<br />
+3.<p style="color:orange">NaN value</p> - calculated expression contains NaN - on of operands, or whole result is undefined (https://learn.microsoft.com/en-us/dotnet/api/system.double.nan)<br />
+4.<p style="color:orange">Infinity</p> - calculated expression contains Infinity (positive or negative one)<br />
+5.<p style="color:orange">Failed calculating expression</p> - exeded recurent entrance limit(either fails to shorten expression, passing it again or amount parentesis is too high. MAX_RECURSIVE_CALLS = 250)<br />
