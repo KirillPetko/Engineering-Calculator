@@ -1,4 +1,8 @@
+
 # <b>Engineering Calculator</b><br /><br />
+=======
+# <b>Engineering Calculator</b><br />
+
 <strong>To use properly insure that:</strong><br />
 1.After each number there is a sign of operation.<br />
 2.After each word of operation there is opened bracket symbol '('.<br />
@@ -9,6 +13,7 @@
 6.Expression in parentheses cannot start from a sign operation exept '-'.<br />
 7.There are no more than one sign operation between math functions or numbers.<br />
 8.Before opened bracket sign '(' only a sign operation can appear (exept when parentheses are opened right from the start of expression).<br />
+
 
 <strong>Keyboard input</strong><br />
 You can type text to calulator's input with any button, if its KeyDown() event was implemented.<br />
@@ -21,3 +26,4 @@ DEL button on your keyboard or 'C' button on GUI.<br/ >
 3.<code style="color : darkorange">NaN value</code> - calculated expression contains NaN - on of operands, or whole result is undefined (https://learn.microsoft.com/en-us/dotnet/api/system.double.nan).<br />
 4.<code style="color : darkorange">Infinity</code> - calculated expression contains Infinity (positive or negative one).<br />
 5.<code style="color : darkorange">Failed calculating expression</code> - exeded recurent entrance limit(either fails to shorten expression, passing it again or amount parentesis is too high. MAX_RECURSIVE_CALLS = 250).<br />
+
