@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Remoting.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Engineering_Calculator
 {
-    //Class responsible for making calculation from input string as well as validating it
+    //Class responsible for making calc from expression string as well as validating it
     internal class Calculation
     {
         public Calculation() 
@@ -18,19 +19,30 @@ namespace Engineering_Calculator
         }
         public Calculation(string _input)
         {
-            input = _input;
-            isValid = Verify(_input);
-            if (isValid) result = Calculate(input);
-            
+            Input = _input;
+            IsValid = Verify(input);
+            if (IsValid)
+            {
+                Expression = Input;
+                Result = Calculate(Expression);
+            }
+            else
+                throw new FormatException("Invalid input");
         }
 
+        private const int MAX_RECURSIVE_CALLS = 250;
+        private static int currentRecursiveCalls = 0;
+
         private string input;
-        private double result;
+        private string expression;
         private bool isValid;
+        private double result;
+        
+
         private static Dictionary<string, string> sequences = new Dictionary<string, string>
         {
             //sequences of type:
-            ["sci-number"] = "^(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?$", //fractional number, or in sientific notation
+            ["sci-number"] = "(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?", //fractional number, or in sientific notation
             ["number"] = "(\\-)?\\d+[\\.?\\d]*", //fractional number
             ["pos-number"] = "\\d+[\\.?\\d]*", //positive fractional number
             ["arc-trigonometry"] = "(asin|acos|atan)(\\-)?\\d+[\\.?\\d]*", //asin-3 or acos90 (single operation)
@@ -50,50 +62,31 @@ namespace Engineering_Calculator
             ["all-math-opr"] = "sin|cos|tan|asin|acos|atan|ln|log|sqrt",
         };
 
-        public string Input 
+        public string Input
         {
-            get 
+            get
             {
                 return input;
             }
             set
             {
-                if (value == null) throw new NotImplementedException("parameter has to be => 0 to be set![Input]");
+                if (value == String.Empty) input = "0";
                 else input = value;
-                    
             }
         }
-        public double Result 
-        {
-            get 
-            {
-                return result;
-            }
-            set
-            { 
-                result = value;
-            }
-        }
-        public bool IsValid
-        {
-            get
-            { 
-                return isValid;
-            }
-            set
-            { 
-                isValid = value;
-            }
-        }
+        public string Expression { get => expression; set => expression = value; }
+        public bool IsValid { get => isValid; set => isValid = value; }
+        public double Result { get => result; set => result = value; }
 
-        //function to parse an input string in order to check its validity
+
+        //function to parse an expression string in order to check its validity
         static bool Verify(string expression)
         {
             if (expression == String.Empty) return false;
 
             Regex number = new Regex(sequences["pos-number"]);
             Regex signOperation = new Regex(sequences["one-sign-opr"]);
-            Regex textOperation = new Regex(sequences["all-math-opr"]);
+            //Regex textOperation = new Regex(sequences["all-math-opr"]);
 
             string word = "";
             int wordType = 0;   //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - bracket "(.." 5 - "..)"
@@ -113,20 +106,27 @@ namespace Engineering_Calculator
                 //word is not yet assigned 
                 if (wordType == 0)                      
                 {
-                    if (Char.IsDigit(c) || c == '.') wordType = 1;
-                    else if (c == '*' || c == '/' || c == '+' || c == '-' || c == '^') wordType = 2;
+                    if (Char.IsDigit(c)) wordType = 1;
+                    else if (c == '-') wordType = 2;
                     else if (Char.IsLetter(c)) wordType = 3;
                     else if (c == '(') wordType = 4;
-                    else if (c == ')') return false;
                     else return false;
 
                     word += c;
-                    //false was not returned yet and the end of expression reached - it must be a single number
                     if (i == expression.Length - 1)
-                        return true;
+                    {
+                        if (c == '(') 
+                            return false;
+                        else if (Char.IsLetter(c))
+                            return false;
+                        //end of expression reached - it must be a single number
+                        else return true;
+                    }
                     else
                         i++;
                     c = expression[i];
+                    if (c == '(') openedBracketsCount++;
+                    if (c == ')') closedBracketsCount++;
                 }
                 if (Char.IsDigit(c) || c == '.') charType = 1;
                 else if (c == '*' || c == '/' || c == '+' || c == '-' || c == '^') charType = 2;
@@ -240,7 +240,7 @@ namespace Engineering_Calculator
          * taking inner string as argument to genereted recurrent entrance of itself
          * then it divides expression in sequences with priorities of operations while
          * callcucating them sequentially with the help of overloaded examples of itself
-         * it also adds 0 in the beginning not to break further calculation process as well
+         * it also adds 0 in the beginning not to break further calc process as well
          * as checking validity of gotten result before returning it, otherwise this function 
          * throws an exeption or continues by recurrent enter untill expression
          * becomes a double-passable string, then it returns a result of that pasing 
@@ -248,8 +248,6 @@ namespace Engineering_Calculator
         static double Calculate(string expression)
         {
             double result;
-
-                
             List<int> openedBracketsIndexes = new List<int>();
             for (int i = 0; i < expression.Length; i++)//iterate over chars to find each corresponding bracket 
             {                                          //pair then hand expression over bracket opening function
@@ -282,7 +280,7 @@ namespace Engineering_Calculator
                 }
             }
 
-            //0 is inserted to insure proper calculation of sequence
+            //0 is inserted to insure proper calc of sequence
             if (expression[0] == '-') expression = "0" + expression;                                                                
   
             expression = Calculate(sequences["arc-trigonometry"], expression, 4);                                                                                                                    
@@ -303,14 +301,15 @@ namespace Engineering_Calculator
 
             expression = Calculate(sequences["add-sub"], expression, 0);
 
-            if (expression.Contains("NaN"))                                                                                         
-                throw new ArithmeticException("NaN value");    
-            else if (expression.Contains("Infinity"))                                                                               
-                throw new ArithmeticException("Infinity");                                                                                                                                           
-            if (Regex.IsMatch(expression, sequences["sci-number"], RegexOptions.IgnoreCase))
-                result = Double.Parse(expression, CultureInfo.InvariantCulture); 
-            else
+            //exCheck(expression);
+            if (Regex.IsMatch(expression, sequences["sci-number"]))//, RegexOptions.IgnoreCase
+                result = Double.Parse(expression, CultureInfo.InvariantCulture);
+            else 
+            {
+                currentRecursiveCalls++;
                 result = Calculate(expression);
+            }
+
             return result;
         }
 
@@ -318,6 +317,7 @@ namespace Engineering_Calculator
         //considering power operation after to avoid broken sequences
         static string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
         {
+            
             double subresult;
             Regex subexpBrackets;
             int subexpLength = i + 1 - openedBracketsIndexes.Last();
@@ -348,9 +348,11 @@ namespace Engineering_Calculator
             return expression;
         }
 
-        //finds sequences in input string by specified pattern argument
+        //finds sequences in expression string by specified pattern argument
+        //calls check of expression before that
         static string Calculate(string sequenceStr, string expression, int operationType)
         {
+            exCheck(expression);
             Regex sequence = new Regex(sequenceStr);
             MatchCollection sequences = sequence.Matches(expression);
             foreach (Match s in sequences)
@@ -359,10 +361,10 @@ namespace Engineering_Calculator
         }
 
         //calculates sequenses of same priority replacing them with fractional number represented in a string
-        static string Calculate(Match seqence, int operationType)
+        static string Calculate(Match sequence, int operationType)
         {
             Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos-sci number)
-            MatchCollection numbers;
+            MatchCollection numbers, operations;
             double result;
             string resultS;
             Regex operation;
@@ -389,11 +391,11 @@ namespace Engineering_Calculator
                     throw new ArgumentException();
             }
 
-            numbers = number.Matches(seqence.Value);
+            numbers = number.Matches(sequence.Value);
 
             if (operationType != 3 && operationType != 4)
             {
-                MatchCollection operations = operation.Matches(seqence.Value);
+                operations = operation.Matches(sequence.Value);
                 result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture);          //result of each sequence of operations 
                 for (int i = 0; i < operations.Count; i++)                                      //with same priority is formed by  
                 {                                                                               //performing this operation with previous  
@@ -403,7 +405,7 @@ namespace Engineering_Calculator
                                                                                                 //completely, then result is returned 
             }                                                                                   //to replace the sequence in expression    
             //operation is trigonometry one -> return result of that single operation
-            else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(seqence.Value).Value);
+            else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(sequence.Value).Value);
 
             resultS = Convert.ToString(result, CultureInfo.InvariantCulture);
             resultS = resultS.Replace(',', '.');
@@ -411,7 +413,7 @@ namespace Engineering_Calculator
 
         }
 
-        //performs mathematical operation between two fractional numbers
+        //performs mathematical operation between two operands (x,y)
         static double Calculate(double x, double y, string operation)
         {
             switch (operation)
@@ -440,6 +442,8 @@ namespace Engineering_Calculator
                     throw new NotImplementedException();
             }
         }
+
+        //performs text-type operation on operand (x)
         static double Calculate(double x, string operation)
         {
             switch (operation)
@@ -466,7 +470,38 @@ namespace Engineering_Calculator
                     throw new NotImplementedException("Such operation has not been implemented!");
 
             }
+        }
 
+        //checks an expression string on validity (called during callculation)
+        //and amount of recursive calls, throws propper exeptions
+        static void exCheck(string expression)
+        {
+            Regex opr = new Regex(sequences["one-sign-opr"]);
+            MatchCollection oprs = opr.Matches(expression);
+            bool alotOfSci = countChr(expression, 'E') > 1,
+                 sciOperation = countChr(expression, 'E') == 1 && oprs.Count > 1;
+
+
+            if (currentRecursiveCalls == MAX_RECURSIVE_CALLS)
+            {
+                currentRecursiveCalls = 0;
+                throw new StackOverflowException("Failed calculating expression");
+            }
+            if (expression.Contains("NaN"))
+                throw new ArithmeticException("NaN value");
+            if (expression.Contains("Infinity"))
+                throw new ArithmeticException("Infinity");
+            if (alotOfSci || sciOperation)
+                throw new FormatException("Wrong operands format");
+
+        }
+        static int countChr(string source, char toFind)
+        {
+            int count = 0;
+            foreach (char c in source)
+                if(c==toFind)
+                    count++;
+            return count;
         }
     }
 }

@@ -43,6 +43,7 @@
             this.MinimizeBox = false;
             this.Name = "CalculatorForm";
             this.Text = "Engineering Calculator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CalculatorForm_FormClosing);
             this.Load += new System.EventHandler(this.CalculatorForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.CalculatorForm_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CalculatorForm_KeyDown);
