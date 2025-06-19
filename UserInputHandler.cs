@@ -12,24 +12,11 @@ namespace Engineering_Calculator
 {
     internal class UserInputHandler
     {
-        public UserInputHandler() 
-        {
-            result = String.Empty;
-            key = String.Empty;
-            isLocked = false;
-            temp = 0;
-
-            exHandler = new ExceptionHandler();
-            exHandler.AddObserver(new ErrorLogger());
-            exHandler.AddObserver(new UserNotification());
-        }
-
         public UserInputHandler(FormElement _textField)
         {
             result = String.Empty;
             key = String.Empty;
-            isLocked = false;
-            temp = 0;
+            IsLocked = false;
             textField = _textField;
 
             exHandler = new ExceptionHandler();
@@ -37,25 +24,16 @@ namespace Engineering_Calculator
             exHandler.AddObserver(new UserNotification(textField));
         }
 
-
         //fields
-        private int temp;
         private string result, key;
         private bool isLocked;
         private FormElement textField;
         private readonly ExceptionHandler exHandler;
 
-        public bool IsLocked
-        {
-            get
-            {
-                return isLocked;
-            }
-            set
-            {
-                isLocked = value;
-            }
-        }
+
+        public bool IsLocked { get => isLocked; set => isLocked = value; }
+        public ExceptionHandler ExHandler => exHandler;
+
 
         //methods
 
@@ -67,8 +45,6 @@ namespace Engineering_Calculator
                 textField.Caption += addition;
                 textField.Draw(g);
             }
-            else
-                throw new NotImplementedException("custom text field was not initialized");
         }
 
         //subtracts one symbol from textField's caption
@@ -76,8 +52,7 @@ namespace Engineering_Calculator
         {
             if (textField.Caption != String.Empty)
             {
-                temp = textField.Caption.Length - 1;
-                textField.Caption = textField.Caption.Substring(0, temp);
+                textField.Caption = textField.Caption.Substring(0, textField.Caption.Length - 1);
                 textField.Draw(g);
             }
         }
@@ -92,23 +67,13 @@ namespace Engineering_Calculator
             try
             {
                 calc = new Calculation(textField.Caption);
-                if (calc.IsValid)
-                {
-                    result = Convert.ToString(calc.Result);
-                    result = result.Replace(",", ".");
-                    textField.Caption = result;
-                }
-                else
-                { 
-                    textField.Caption = "Invalid input";
-                    isLocked = true;
-                } 
+                result = Convert.ToString(calc.Result);
+                textField.Caption = result.Replace(",", "."); 
             }
             catch (Exception ex) 
             {   
-                //textField.Caption = ex.Message;
-                exHandler.HandleException(ex);
-                isLocked = true;
+                ExHandler.HandleException(ex);
+                IsLocked = true;
             }
             textField.Draw(g);
         }
@@ -120,7 +85,6 @@ namespace Engineering_Calculator
             {
                 textField.Caption = String.Empty;
                 textField.Draw(g);
-                isLocked = false;
             }
         }
 
@@ -201,6 +165,8 @@ namespace Engineering_Calculator
                 if (e.KeyCode == Keys.OemQuestion || e.KeyCode == Keys.Oem5)
                     AddToCaption("/", g);
                 if (e.KeyCode == Keys.OemPeriod)
+                    AddToCaption(".", g);
+                if (e.KeyCode == Keys.Oemcomma)
                     AddToCaption(".", g);
                 if (e.KeyCode == Keys.Delete)
                 {

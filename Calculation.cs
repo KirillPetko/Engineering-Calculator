@@ -19,13 +19,15 @@ namespace Engineering_Calculator
         }
         public Calculation(string _input)
         {
-            input = _input;
-            isValid = Verify(input);
-            if (isValid)
+            Input = _input;
+            IsValid = Verify(input);
+            if (IsValid)
             {
-                expression = input;
-                result = Calculate(expression);
-            } 
+                Expression = Input;
+                Result = Calculate(Expression);
+            }
+            else
+                throw new FormatException("Invalid input");
         }
 
         private const int MAX_RECURSIVE_CALLS = 250;
@@ -33,8 +35,9 @@ namespace Engineering_Calculator
 
         private string input;
         private string expression;
-        private double result;
         private bool isValid;
+        private double result;
+        
 
         private static Dictionary<string, string> sequences = new Dictionary<string, string>
         {
@@ -67,44 +70,14 @@ namespace Engineering_Calculator
             }
             set
             {
-                if (value == String.Empty) throw new ArgumentException("Input is String.Empty");
+                if (value == String.Empty) input = "0";
                 else input = value;
             }
         }
-        public string Expression 
-        {
-            get 
-            {
-                return expression;
-            }
-            set
-            {
-                if (value == String.Empty) throw new ArgumentException("Expression is String.Empty");
-                else expression = value;     
-            }
-        }
-        public double Result 
-        {
-            get 
-            {
-                return result;
-            }
-            set
-            { 
-                result = value;
-            }
-        }
-        public bool IsValid
-        {
-            get
-            { 
-                return isValid;
-            }
-            set
-            { 
-                isValid = value;
-            }
-        }
+        public string Expression { get => expression; set => expression = value; }
+        public bool IsValid { get => isValid; set => isValid = value; }
+        public double Result { get => result; set => result = value; }
+
 
         //function to parse an expression string in order to check its validity
         static bool Verify(string expression)
@@ -113,7 +86,7 @@ namespace Engineering_Calculator
 
             Regex number = new Regex(sequences["pos-number"]);
             Regex signOperation = new Regex(sequences["one-sign-opr"]);
-            Regex textOperation = new Regex(sequences["all-math-opr"]);
+            //Regex textOperation = new Regex(sequences["all-math-opr"]);
 
             string word = "";
             int wordType = 0;   //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - bracket "(.." 5 - "..)"
@@ -133,17 +106,22 @@ namespace Engineering_Calculator
                 //word is not yet assigned 
                 if (wordType == 0)                      
                 {
-                    if (Char.IsDigit(c) || c == '.') wordType = 1;
-                    else if (c == '*' || c == '/' || c == '+' || c == '-' || c == '^') wordType = 2;
+                    if (Char.IsDigit(c)) wordType = 1;
+                    else if (c == '-') wordType = 2;
                     else if (Char.IsLetter(c)) wordType = 3;
                     else if (c == '(') wordType = 4;
-                    else if (c == ')') return false;
                     else return false;
 
                     word += c;
-                    //false was not returned yet and the end of expression reached - it must be a single number
                     if (i == expression.Length - 1)
-                        return true;
+                    {
+                        if (c == '(') 
+                            return false;
+                        else if (Char.IsLetter(c))
+                            return false;
+                        //end of expression reached - it must be a single number
+                        else return true;
+                    }
                     else
                         i++;
                     c = expression[i];
@@ -270,8 +248,6 @@ namespace Engineering_Calculator
         static double Calculate(string expression)
         {
             double result;
-
-                
             List<int> openedBracketsIndexes = new List<int>();
             for (int i = 0; i < expression.Length; i++)//iterate over chars to find each corresponding bracket 
             {                                          //pair then hand expression over bracket opening function
@@ -325,7 +301,7 @@ namespace Engineering_Calculator
 
             expression = Calculate(sequences["add-sub"], expression, 0);
 
-            exCheck(expression);
+            //exCheck(expression);
             if (Regex.IsMatch(expression, sequences["sci-number"]))//, RegexOptions.IgnoreCase
                 result = Double.Parse(expression, CultureInfo.InvariantCulture);
             else 
@@ -341,6 +317,7 @@ namespace Engineering_Calculator
         //considering power operation after to avoid broken sequences
         static string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
         {
+            
             double subresult;
             Regex subexpBrackets;
             int subexpLength = i + 1 - openedBracketsIndexes.Last();
@@ -372,8 +349,10 @@ namespace Engineering_Calculator
         }
 
         //finds sequences in expression string by specified pattern argument
+        //calls check of expression before that
         static string Calculate(string sequenceStr, string expression, int operationType)
         {
+            exCheck(expression);
             Regex sequence = new Regex(sequenceStr);
             MatchCollection sequences = sequence.Matches(expression);
             foreach (Match s in sequences)
@@ -382,7 +361,7 @@ namespace Engineering_Calculator
         }
 
         //calculates sequenses of same priority replacing them with fractional number represented in a string
-        static string Calculate(Match seqence, int operationType)
+        static string Calculate(Match sequence, int operationType)
         {
             Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos-sci number)
             MatchCollection numbers, operations;
@@ -412,11 +391,11 @@ namespace Engineering_Calculator
                     throw new ArgumentException();
             }
 
-            numbers = number.Matches(seqence.Value);
+            numbers = number.Matches(sequence.Value);
 
             if (operationType != 3 && operationType != 4)
             {
-                operations = operation.Matches(seqence.Value);
+                operations = operation.Matches(sequence.Value);
                 result = Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture);          //result of each sequence of operations 
                 for (int i = 0; i < operations.Count; i++)                                      //with same priority is formed by  
                 {                                                                               //performing this operation with previous  
@@ -426,7 +405,7 @@ namespace Engineering_Calculator
                                                                                                 //completely, then result is returned 
             }                                                                                   //to replace the sequence in expression    
             //operation is trigonometry one -> return result of that single operation
-            else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(seqence.Value).Value);
+            else result = Calculate(Double.Parse(numbers[0].Value, CultureInfo.InvariantCulture), operation.Match(sequence.Value).Value);
 
             resultS = Convert.ToString(result, CultureInfo.InvariantCulture);
             resultS = resultS.Replace(',', '.');

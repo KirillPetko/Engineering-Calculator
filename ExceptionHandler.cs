@@ -11,7 +11,6 @@ namespace Engineering_Calculator
     public class ExceptionHandler 
     {
         private readonly List<IExceptionObserver> _observers;
-        private Exception e;
         public ExceptionHandler() 
         {
             _observers = new List<IExceptionObserver>();    
@@ -31,18 +30,6 @@ namespace Engineering_Calculator
         {
             foreach (IExceptionObserver observer in _observers)
                 observer.OnException(e);
-        }
-        public Exception E
-        {
-            get 
-            { 
-                return e; 
-            }
-            set 
-            {
-                e = value;
-                HandleException(e);
-            }
         }
     }
 }

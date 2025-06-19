@@ -15,19 +15,19 @@ namespace Engineering_Calculator
     {
         public CustomTextField() 
         {
-            x = 50;
-            y = 50;
-            width = 675; 
-            height = 50;
-            caption = String.Empty;
+            X = 50;
+            Y = 50;
+            Width = 675; 
+            Height = 50;
+            Caption = String.Empty;
         }
         public CustomTextField(int _x, int _y, int _width, int _height, string _caption)
         {
-            x = _x;
-            y = _y;
-            width = _width;
-            height = _height;
-            caption = _caption;
+            X = _x;
+            Y = _y;
+            Width = _width;
+            Height = _height;
+            Caption = _caption;
         }
 
         private int x;
@@ -36,70 +36,11 @@ namespace Engineering_Calculator
         private int height;
         private string caption;
 
-        public override int X 
-        {
-            get 
-            {
-                return x;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![X]");
-                else x = value;
-            }
-        }
-        public override int Y
-        {
-            get
-            {
-                return y;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Y]");
-                else y = value;
-            }
-        }
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Width]");
-                else width = value;
-            }
-        }
-
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Height]");
-                else height = value;
-            }
-        }
-        public override string Caption
-        {
-            get
-            {
-                return caption;
-            }
-            set
-            {
-                caption = value;
-            }
-        }
+        public override int X { get => x; set => x = value; }
+        public override int Y { get => y; set => y = value; }
+        public override int Width { get => width; set => width = value; }
+        public override int Height { get => height; set => height = value; }
+        public override string Caption { get => caption; set => caption = value; }
 
         public override void Draw(Graphics g)
         {
@@ -111,7 +52,7 @@ namespace Engineering_Calculator
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            rect = new Rectangle(X, Y, Width, Height);
+            rect = new Rectangle(x, y, width, height);
             brush = new SolidBrush(Color.Black);
             brush1 = new SolidBrush(Color.Orange);
             fnt = new System.Drawing.Font("Consolas", (float)20);//even character length
@@ -121,7 +62,7 @@ namespace Engineering_Calculator
                 g.DrawString(Caption, fnt, brush1, x + 10, y + 5);
             else
             {
-                string visibleCaption = Caption;
+                string visibleCaption = caption;
                 visibleCaption = visibleCaption.Substring(visibleCaption.Length - 43);
                 g.DrawString(visibleCaption, fnt, brush1, x + 10, y + 5);
             }

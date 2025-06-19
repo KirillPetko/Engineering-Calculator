@@ -12,19 +12,19 @@ namespace Engineering_Calculator
     {
         public CustomButton()
         {
-            x = 0;
-            y = 0;
-            width = 0;
-            height = 0;
-            caption = string.Empty;
+            X = 0;
+            Y = 0;
+            Width = 0;
+            Height = 0;
+            Caption = string.Empty;
         }
         public CustomButton(int _x, int _y, int _width, int _height, string _caption) 
         { 
-            x = _x;
-            y = _y;
-            width = _width;
-            height = _height;
-            caption = _caption;
+            X = _x;
+            Y = _y;
+            Width = _width;
+            Height = _height;
+            Caption = _caption;
         }
 
         private int x;
@@ -33,74 +33,12 @@ namespace Engineering_Calculator
         private int height;
         private string caption;
 
-        public override int X
-        {
-            get
-            {
-                return x;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![X]");
-                else x = value;
-            }
-        }
-        public override int Y
-        {
-            get
-            {
-                return y;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Y]");
-                else y = value;
-            }
-        }
-        public override int Width
-        {
-            get
-            {
-                return width;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Width]");
-                else width = value;
-            }
-        }
+        public override int X { get => x; set => x = value; }
+        public override int Y { get => y; set => y = value; }
+        public override int Width { get => width; set => width = value; }
+        public override int Height { get => height; set => height = value; }
+        public override string Caption { get => caption; set => caption = value; }
 
-        public override int Height
-        {
-            get
-            {
-                return height;
-            }
-            set
-            {
-                if (value < 0)
-                    throw new NotImplementedException("parameter has to be => 0 to be set![Height]");
-                else height = value;
-            }
-        }
-
-        public override string Caption
-        {
-            get
-            {
-                return caption;
-            }
-            set 
-            {
-                if(value == String.Empty)
-                    throw new NotImplementedException("parameter has to differ from String.Empty to be set![Caption]");
-                else caption = value;
-
-            }
-        }
 
         public override void Draw(Graphics g)
         {
@@ -115,7 +53,7 @@ namespace Engineering_Calculator
                 brush = new SolidBrush(Color.Black);
             fnt = new System.Drawing.Font("SansSerif", (float)15);
             pen = new Pen(Color.Black, 1);
-            border = new Rectangle(X, Y, Width, Height);
+            border = new Rectangle(x, y, width, height);
             g.DrawRectangle(pen, border);
 
             //centring caption in button rectangle by caption length

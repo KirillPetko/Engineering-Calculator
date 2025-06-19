@@ -28,7 +28,7 @@ namespace Engineering_Calculator
        
         //fields
         Graphics g;
-        CalculatorCore Core;
+        CalculatorCore core;
 
         //methods
 
@@ -36,26 +36,26 @@ namespace Engineering_Calculator
         private void CalculatorForm_Load(object sender, EventArgs e)
         {
             g = CreateGraphics();
-            Core = new CalculatorCore(this.Width, this.Height);
+            core = new CalculatorCore(this.Width, this.Height);
         }
 
         //creating visual representation of bitmap on paint event
         private void CalculatorForm_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(Core.Buffer, 0, 0);
+            e.Graphics.DrawImage(core.Buffer, 0, 0);
         }
         private void CalculatorForm_KeyDown(object sender, KeyEventArgs e)
         {
-            Core.InvokeKeyHandler(e, g);
+            core.InvokeKeyHandler(e, g);
         }
         private void CalculatorForm_MouseClick(object sender, MouseEventArgs e)
         {
-            Core.InvokeClickHandler(e, g);
+            core.InvokeClickHandler(e, g);
         }
         private void CalculatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             g.Dispose();
-            Core.Buffer.Dispose();
+            core.Buffer.Dispose();
         }
     }
 }
