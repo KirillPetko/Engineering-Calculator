@@ -10,16 +10,17 @@ using System.Threading.Tasks;
 
 namespace Engineering_Calculator
 {
-    //Class responsible for making calc from expression string as well as validating it
+    //Class responsible for making emptyCalculation from expression string as well as validating it
     internal class Calculation
     {
         public Calculation() 
         {
         
         }
-        public Calculation(string _input)
+        public Calculation(string _input, ErrorFactory _errFactory)
         {
             Input = _input;
+            errFactory = _errFactory;
             IsValid = Verify(input);
             if (IsValid)
             {
@@ -27,16 +28,20 @@ namespace Engineering_Calculator
                 Result = Calculate(Expression);
             }
             else
-                throw new FormatException("Invalid input");
+            {
+                Exception e = errFactory.CreateCalculationException("Invalid input", "FormatException", _input, _input);
+                throw e;
+            }
         }
 
         private const int MAX_RECURSIVE_CALLS = 250;
         private static int currentRecursiveCalls = 0;
 
-        private string input;
+        private static string input;
         private string expression;
         private bool isValid;
         private double result;
+        private static ErrorFactory errFactory;
         
 
         private static Dictionary<string, string> sequences = new Dictionary<string, string>
@@ -62,7 +67,7 @@ namespace Engineering_Calculator
             ["all-math-opr"] = "sin|cos|tan|asin|acos|atan|ln|log|sqrt",
         };
 
-        public string Input
+        public static string Input
         {
             get
             {
@@ -78,7 +83,6 @@ namespace Engineering_Calculator
         public bool IsValid { get => isValid; set => isValid = value; }
         public double Result { get => result; set => result = value; }
 
-
         //function to parse an expression string in order to check its validity
         static bool Verify(string expression)
         {
@@ -86,7 +90,6 @@ namespace Engineering_Calculator
 
             Regex number = new Regex(sequences["pos-number"]);
             Regex signOperation = new Regex(sequences["one-sign-opr"]);
-            //Regex textOperation = new Regex(sequences["all-math-opr"]);
 
             string word = "";
             int wordType = 0;   //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - bracket "(.." 5 - "..)"
@@ -240,7 +243,7 @@ namespace Engineering_Calculator
          * taking inner string as argument to genereted recurrent entrance of itself
          * then it divides expression in sequences with priorities of operations while
          * callcucating them sequentially with the help of overloaded examples of itself
-         * it also adds 0 in the beginning not to break further calc process as well
+         * it also adds 0 in the beginning not to break further emptyCalculation process as well
          * as checking validity of gotten result before returning it, otherwise this function 
          * throws an exeption or continues by recurrent enter untill expression
          * becomes a double-passable string, then it returns a result of that pasing 
@@ -280,7 +283,7 @@ namespace Engineering_Calculator
                 }
             }
 
-            //0 is inserted to insure proper calc of sequence
+            //0 is inserted to insure proper emptyCalculation of sequence
             if (expression[0] == '-') expression = "0" + expression;                                                                
   
             expression = Calculate(sequences["arc-trigonometry"], expression, 4);                                                                                                                    
@@ -301,8 +304,7 @@ namespace Engineering_Calculator
 
             expression = Calculate(sequences["add-sub"], expression, 0);
 
-            //exCheck(expression);
-            if (Regex.IsMatch(expression, sequences["sci-number"]))//, RegexOptions.IgnoreCase
+            if (Regex.IsMatch(expression, sequences["sci-number"]))
                 result = Double.Parse(expression, CultureInfo.InvariantCulture);
             else 
             {
@@ -357,6 +359,12 @@ namespace Engineering_Calculator
             MatchCollection sequences = sequence.Matches(expression);
             foreach (Match s in sequences)
                 expression = expression.Replace(s.Value, Calculate(s, operationType));
+            sequences = sequence.Matches(expression);
+            if (sequences.Count > 0)
+            {   //calculated sequnce replaced in expression creates the same one sequnce
+                currentRecursiveCalls++;
+                expression = Calculate(sequenceStr, expression, operationType);
+            }
             return expression;
         }
 
@@ -476,24 +484,33 @@ namespace Engineering_Calculator
         //and amount of recursive calls, throws propper exeptions
         static void exCheck(string expression)
         {
+            Exception e;
             Regex opr = new Regex(sequences["one-sign-opr"]);
             MatchCollection oprs = opr.Matches(expression);
             bool alotOfSci = countChr(expression, 'E') > 1,
                  sciOperation = countChr(expression, 'E') == 1 && oprs.Count > 1;
 
-
             if (currentRecursiveCalls == MAX_RECURSIVE_CALLS)
             {
                 currentRecursiveCalls = 0;
-                throw new StackOverflowException("Failed calculating expression");
+                e = errFactory.CreateCalculationException("Failed calculating expression", "StackOverflowException", expression, input);
+                throw e;
             }
-            if (expression.Contains("NaN"))
-                throw new ArithmeticException("NaN value");
-            if (expression.Contains("Infinity"))
-                throw new ArithmeticException("Infinity");
-            if (alotOfSci || sciOperation)
-                throw new FormatException("Wrong operands format");
-
+            else if (expression.Contains("NaN"))
+            {
+                e = errFactory.CreateCalculationException("NaN value", "ArithmeticException", expression, input);
+                throw e;
+            }
+            else if (expression.Contains("Infinity"))
+            {
+                e = errFactory.CreateCalculationException("Infinity", "ArithmeticException", expression, input);
+                throw e;
+            }
+            else if (alotOfSci || sciOperation)
+            {
+                e = errFactory.CreateCalculationException("Wrong operands format", "ArithmeticException", expression, input);
+                throw e;
+            }
         }
         static int countChr(string source, char toFind)
         {

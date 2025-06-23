@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Engineering_Calculator
         
         public UserNotification(FormElement element)
         {
-            textField = element;
+                textField = element;
         }
         FormElement textField;
         public void OnException(Exception e)

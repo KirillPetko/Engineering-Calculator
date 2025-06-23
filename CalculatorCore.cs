@@ -8,68 +8,43 @@ using System.Windows.Forms;
 
 namespace Engineering_Calculator
 {
-    //responsible for logic, user input, and graphic data
+    //responsible for logic, user input, and graphic data interactions
+    //also implements initialization
     internal class CalculatorCore
     {
         public CalculatorCore(int _width, int _height) 
         {
-            //button captions
-            captions = new[]
-            {
-            "1","2","3","sin","cos","tan","asin","acos","atan",
-            "4","5","6","ln","log","^","^2","e","Pi",
-            "7","8","9","sqrt","ans","+","-","/","*",
-            "0",".","(",")","C","<-","="
-            };
             //supposed to be Form's w and h
             width = _width; 
             height = _height;
             Buffer = new Bitmap(width, height);
-            FormElementsInit();
+
+            Containers = new ContainerManager();
             UpdateBitmap();
-            HandlerUI = new UserInputHandler(FormElements[0]);
+
+            errFactory = new ErrorFactory();
+            exHandler = new ExceptionHandler();
+            HandlerUI = new UserInputHandler(Containers.GetCustomTextField(), ErrFactory, exHandler);
         }
-        //Calculation[] calculations;
-        private Calculation calc;
+
+        //fields
         private UserInputHandler handlerUI;
-        private FormElement[] formElements;
-        private string[] captions;
-        private Bitmap buffer; //faster drawing
+        private ContainerManager сontainers;
+        private Bitmap buffer; //implemented for faster drawing
+
+        private readonly ErrorFactory errFactory;
+        private readonly ExceptionHandler exHandler;
+
         private int width; 
         private int height;
 
-        internal Calculation Calc { get => calc; set => calc = value; }
+        //internal Calculation Calc { get => emptyCalculation; set => emptyCalculation = value; }
         internal UserInputHandler HandlerUI { get => handlerUI; set => handlerUI = value; }
-        internal FormElement[] FormElements { get => formElements; set => formElements = value; }
         public Bitmap Buffer { get => buffer; set => buffer = value; }
+        public ErrorFactory ErrFactory { get => errFactory; }
+        public ExceptionHandler ExHandler => exHandler;
+        internal ContainerManager Containers { get => сontainers; set => сontainers = value; }
 
-
-        //initiallizes formElements, filling their fields
-        public void FormElementsInit()
-        {
-            FormElements = new FormElement[35];
-            int bXPosition = -25, bYPosition = 150, bWidth = 75, bHeight = 75;
-            int rowButtonCounter = 0;
-
-            for (int i = 0; i < FormElements.Length; i++)
-            {
-                if (i == 0)
-                    FormElements[i] = new CustomTextField();
-                else
-                {
-                    FormElements[i] = new CustomButton(bXPosition, bYPosition, bWidth, bHeight, captions[i - 1]);
-                    rowButtonCounter++;
-                }
-                if (rowButtonCounter == 9)
-                {
-                    bYPosition += 75;
-                    bXPosition = 50;
-                    rowButtonCounter = 0;
-                }
-                else
-                    bXPosition += 75;
-            }
-        }
         public void UpdateBitmap()
         {
             //clearing outdated bitmap before reinitializing
@@ -81,41 +56,54 @@ namespace Engineering_Calculator
                 //increasing smoothnes of writen text
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                foreach (FormElement element in FormElements)
+                foreach (FormElement element in Containers.ElementsUI)
                     element.Draw(graphics);
             }
         }
-        //passes customTextFiled (formElements[0]) to 
-        //UserInputHandler() instance also unlocks 
-        //UserInputHandler() instance, if customTextField is cleared
+        //passes key data to UserInputHandler() instance
+        //to handle KeyDown() event. Also unlocks
+        //UserInputHandler(), if customTextField is cleared
         public void InvokeKeyHandler(KeyEventArgs e, Graphics g)
         {
             if (!HandlerUI.IsLocked)
-                HandlerUI.HandleKeyDown(g, e, Calc);
+            {
+                HandlerUI.HandleKeyDown(g, e);
+                if (e.KeyCode == Keys.Enter)
+                { 
+                    Containers.Calculations.Add(HandlerUI.Product);
+                    Containers.SaveLastCalculationToTextFile();
+                }
+                    
+            }
+                
             if (HandlerUI.IsLocked && e.KeyCode == Keys.Delete)
             {
                 HandlerUI.ClearCaption(g);
                 HandlerUI.IsLocked = false;
             }
-                
+
             UpdateBitmap();
         }
 
-        //checks click location, defines clicked element, then passes  
-        //customTextField (formElements[0]) to UserInputHandler()
-        //also unlocks UserInputHandler() instance, if customTextField is cleared
+        //checks click location, defines clicked element, by 
+        //calling FormElement:CheckPoint() method. Also unlocks
+        //UserInputHandler() instance, if customTextField is cleared
         public void InvokeClickHandler(MouseEventArgs e, Graphics g)
         {
             bool isClicked = false;
             string buttonCaption = String.Empty;
             if (e.Button == MouseButtons.Left)
-                for (int i = 1; i < FormElements.Length; i++)
+                for (int i = 1; i < Containers.ElementsUI.Length; i++)
                 {
-                    var btn = FormElements[i];
-                    isClicked = FormElements[i].CheckPoint(e.X, e.Y);
-                    buttonCaption = FormElements[i].Caption;
+                    var btn = Containers.ElementsUI[i];
+                    isClicked = btn.CheckPoint(e.X, e.Y);
+                    buttonCaption = btn.Caption;
                     if (isClicked && !HandlerUI.IsLocked)
-                        HandlerUI.HandleButtonClick(g, btn, Calc);
+                    { 
+                        HandlerUI.HandleButtonClick(g, btn);
+                        if (buttonCaption == "=" && HandlerUI.Product != null) 
+                            Containers.Calculations.Add(HandlerUI.Product);
+                    }  
                     if (isClicked && buttonCaption == "C" && HandlerUI.IsLocked) 
                     {
                         HandlerUI.ClearCaption(g);

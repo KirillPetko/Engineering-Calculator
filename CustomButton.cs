@@ -38,7 +38,10 @@ namespace Engineering_Calculator
         public override int Width { get => width; set => width = value; }
         public override int Height { get => height; set => height = value; }
         public override string Caption { get => caption; set => caption = value; }
-
+        public override string GetTypeString()
+        {
+            return "CustomButton";
+        }
 
         public override void Draw(Graphics g)
         {
