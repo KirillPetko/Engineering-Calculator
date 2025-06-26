@@ -11,11 +11,11 @@ namespace Engineering_Calculator
     {
         public UserNotification() { }
         
-        public UserNotification(FormElement element)
+        public UserNotification(CustomTextField _textField)
         {
-                textField = element;
+            textField = _textField;
         }
-        FormElement textField;
+        CustomTextField textField;
         public void OnException(Exception e)
         { 
             textField.Caption = e.Message;

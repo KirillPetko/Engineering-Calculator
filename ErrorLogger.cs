@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,9 +29,9 @@ namespace Engineering_Calculator
                     dateMsgSeparator = "\t";
                 if (userInputLength <= 7)
                     dataSeparator = "\t\t\t\t\t\t";
-                if (userInputLength >= 8 && userInputLength < 14)
+                if (userInputLength >= 8 && userInputLength <= 14)
                     dataSeparator = "\t\t\t\t\t";
-                if (userInputLength >= 14 && userInputLength < 24)
+                if (userInputLength >= 15 && userInputLength < 24)
                     dataSeparator = "\t\t\t\t";
                 if (userInputLength >= 24 && userInputLength < 32)
                     dataSeparator = "\t\t\t";

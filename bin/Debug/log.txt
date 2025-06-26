@@ -61,3 +61,95 @@
 23.06.2025 18:10:36	Invalid input		((2*((-3)^(-(2^(4)))				>>>>>		((2*((-3)^(-(2^(4)))
 23.06.2025 18:11:11	Wrong operands format	((2*((-3)^(-(2^(4))))))				>>>>>		2*2.32305731254188E-08
 23.06.2025 18:34:55	NaN value		asin(3)+acos(0)^(-2)				>>>>>		NaN+1.5707963267949^-2
+24.06.2025 16:53:52	Invalid input		2*3(						>>>>>		2*3(
+24.06.2025 17:04:03	Invalid input		aaaaaaaaaaaaaaaaaaaaaaaa((((((((((((((((((((((((((((((((((asdasdasdasdasdasdasdasdasdasd	>>>>>		aaaaaaaaaaaaaaaaaaaaaaaa((((((((((((((((((((((((((((((((((asdasdasdasdasdasdasdasdasdasd
+24.06.2025 17:42:37	Invalid input		asdasdasd					>>>>>		asdasdasd
+24.06.2025 17:47:07	Invalid input		2^^						>>>>>		2^^
+24.06.2025 17:47:19	Wrong operands format	2^50+3						>>>>>		1.12589990684262E+15+3
+24.06.2025 18:10:37	Invalid input		2sadasdasd					>>>>>		2sadasdasd
+24.06.2025 18:13:47	Invalid input		asd						>>>>>		asd
+24.06.2025 18:14:19	Invalid input		2-						>>>>>		2-
+24.06.2025 18:14:56	Infinity		79410^232					>>>>>		Infinity
+24.06.2025 18:18:47	Invalid input		asdasd						>>>>>		asdasd
+24.06.2025 18:20:04	Wrong operands format	2*567^(-3)					>>>>>		2*5.48593709375779E-09
+24.06.2025 19:04:39	Wrong operands format	2^50-123					>>>>>		1.12589990684262E+15-123
+24.06.2025 19:04:54	Wrong operands format	2^50-32						>>>>>		1.12589990684262E+15-32
+24.06.2025 19:05:00	Invalid input		asdasdasd					>>>>>		asdasdasd
+24.06.2025 19:05:54	Wrong operands format	2^50-321					>>>>>		1.12589990684262E+15-321
+24.06.2025 19:06:00	Invalid input		222asd						>>>>>		222asd
+24.06.2025 19:10:07	Wrong operands format	2^50-1						>>>>>		1.12589990684262E+15-1
+24.06.2025 19:15:37	Wrong operands format	-369369353/12344^(-2)				>>>>>		0-369369353/6.56278495612279E-09
+24.06.2025 19:16:41	Wrong operands format	-369369353/12344^(-2)				>>>>>		0-369369353/6.56278495612279E-09
+24.06.2025 19:22:35	Invalid input		asdmkjasfhkasjf				>>>>>		asdmkjasfhkasjf
+24.06.2025 19:22:48	Infinity		4^3242-12					>>>>>		Infinity-12
+24.06.2025 20:49:54	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:10:22	The type initializer for 'Engineering_Calculator.Calculation' threw an exception.	System.TypeInitializationException
+24.06.2025 21:12:30	Wrong operands format	2^50-1						>>>>>		1.12589990684262E+15-1
+24.06.2025 21:12:34	Infinity		1/0						>>>>>		Infinity
+24.06.2025 21:13:14	Invalid input		asdasd						>>>>>		asdasd
+24.06.2025 21:24:33	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:30:56	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:35:27	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:45:56	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:46:44	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:47:05	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:47:26	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:52:32	Invalid input		123..3+23+3					>>>>>		123..3+23+3
+24.06.2025 21:53:34	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:56:02	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:57:10	Invalid input		1..2						>>>>>		1..2
+24.06.2025 21:57:20	Invalid input		1..3/2						>>>>>		1..3/2
+24.06.2025 21:57:40	Invalid input		2+1.3.4						>>>>>		2+1.3.4
+24.06.2025 21:57:50	Invalid input		1+1..2+3					>>>>>		1+1..2+3
+24.06.2025 21:58:04	Input string was not in a correct format.	System.FormatException
+24.06.2025 21:59:32	Invalid input		.3+2						>>>>>		.3+2
+24.06.2025 21:59:37	Invalid input		3+.3						>>>>>		3+.3
+24.06.2025 21:59:52	Input string was not in a correct format.	System.FormatException
+24.06.2025 22:01:26	Invalid input		2+(1.2.3+3)+3					>>>>>		2+(1.2.3+3)+3
+24.06.2025 22:02:17	Input string was not in a correct format.	System.FormatException
+24.06.2025 22:03:28	Invalid input		1/.+3						>>>>>		1/.+3
+24.06.2025 22:04:04	Invalid input		1+(3..3)+1					>>>>>		1+(3..3)+1
+24.06.2025 22:04:44	Invalid input		1+(.1)+1					>>>>>		1+(.1)+1
+24.06.2025 22:04:53	Invalid input		1..2+3+3					>>>>>		1..2+3+3
+24.06.2025 22:05:04	Invalid input		1+1.1.1+1+1					>>>>>		1+1.1.1+1+1
+24.06.2025 22:05:40	Invalid input		1+(.1+1)-1					>>>>>		1+(.1+1)-1
+24.06.2025 22:13:39	Invalid input		6^-625						>>>>>		6^-625
+25.06.2025 14:54:21	Wrong operands format	12+12*(0.3+sqrt(12312))^(-3)			>>>>>		12+12*7.26087984171157E-07
+25.06.2025 14:55:06	Invalid input		asdkjsadhfns					>>>>>		asdkjsadhfns
+25.06.2025 14:55:17	NaN value		sqrt(-4)					>>>>>		NaN
+25.06.2025 17:30:29	Invalid input		asdasasdasd					>>>>>		asdasasdasd
+25.06.2025 17:31:20	Invalid input		qasdas						>>>>>		qasdas
+25.06.2025 17:39:54	Invalid input		asdasd555ln(log(^2/(				>>>>>		asdasd555ln(log(^2/(
+25.06.2025 17:45:31	Invalid input		asdasdasdsqrt(				>>>>>		asdasdasdsqrt(
+25.06.2025 18:00:30	Invalid input		4asdas						>>>>>		4asdas
+25.06.2025 18:00:35	Wrong operands format	2^50+2						>>>>>		1.12589990684262E+15+2
+25.06.2025 18:00:39	Infinity		1/0+3						>>>>>		Infinity+3
+25.06.2025 18:00:46	Invalid input		1..3+2						>>>>>		1..3+2
+25.06.2025 18:00:55	Invalid input		1+(1..2)+2					>>>>>		1+(1..2)+2
+25.06.2025 18:01:09	Infinity		786080^786080					>>>>>		Infinity
+25.06.2025 18:02:23	Invalid input		123asd						>>>>>		123asd
+25.06.2025 18:05:07	Invalid input		-1210ln(					>>>>>		-1210ln(
+25.06.2025 18:21:54	Invalid input		asdasdasd					>>>>>		asdasdasd
+25.06.2025 18:22:08	Wrong operands format	2^50+23						>>>>>		1.12589990684262E+15+23
+25.06.2025 18:22:15	Invalid input		1..2+23						>>>>>		1..2+23
+25.06.2025 18:23:37	Invalid input		asdasd^2					>>>>>		asdasd^2
+25.06.2025 18:34:40	NaN value		acos(123)					>>>>>		NaN
+25.06.2025 18:50:05	Invalid input		asdasdasdasdasd/				>>>>>		asdasdasdasdasd/
+25.06.2025 18:53:04	Invalid input		cos(tan(asin					>>>>>		cos(tan(asin
+25.06.2025 19:18:33	Invalid input		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaHistoryButton	>>>>>		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaHistoryButton
+25.06.2025 19:43:01	Invalid input		asdasdasd					>>>>>		asdasdasd
+25.06.2025 19:56:12	Invalid input		^log(5)						>>>>>		^log(5)
+25.06.2025 20:22:40	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:27:10	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:27:26	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:27:40	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:29:04	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:30:13	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:31:48	Invalid input		asdasdasdsqrt(				>>>>>		asdasdasdsqrt(
+25.06.2025 20:33:06	Invalid input		*********************				>>>>>		*********************
+25.06.2025 20:33:18	Invalid input		123456789-					>>>>>		123456789-
+25.06.2025 20:33:39	Invalid input		12345678901234567890-				>>>>>		12345678901234567890-
+25.06.2025 20:33:58	Invalid input		asdasdasdsqrt(					>>>>>		asdasdasdsqrt(
+25.06.2025 20:34:14	Invalid input		.						>>>>>		.
+25.06.2025 20:34:58	Не удается найти указанный файл	System.ComponentModel.Win32Exception
+25.06.2025 20:36:34	Не удается найти указанный файл	System.ComponentModel.Win32Exception

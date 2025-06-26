@@ -56,8 +56,10 @@ namespace Engineering_Calculator
                 //increasing smoothnes of writen text
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                foreach (FormElement element in Containers.ElementsUI)
-                    element.Draw(graphics);
+                //foreach (FormElement element in Containers.ElementsUI)
+                //    element.Draw(graphics);
+                for (int i = 0;i< Containers.ElementsUI.Length;i++)
+                    Containers.ElementsUI[i].Draw(graphics);
             }
         }
         //passes key data to UserInputHandler() instance
@@ -72,10 +74,8 @@ namespace Engineering_Calculator
                 { 
                     Containers.Calculations.Add(HandlerUI.Product);
                     Containers.SaveLastCalculationToTextFile();
-                }
-                    
+                }   
             }
-                
             if (HandlerUI.IsLocked && e.KeyCode == Keys.Delete)
             {
                 HandlerUI.ClearCaption(g);
@@ -108,8 +108,7 @@ namespace Engineering_Calculator
                     {
                         HandlerUI.ClearCaption(g);
                         HandlerUI.IsLocked = false;
-                    }
-                        
+                    }  
                 }
             UpdateBitmap();
         }

@@ -92,6 +92,7 @@
     <Compile Include="FileManager.cs" />
     <Compile Include="ContainerManager.cs" />
     <Compile Include="FormElement.cs" />
+    <Compile Include="HistoryButton.cs" />
     <Compile Include="IExceptionObserver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

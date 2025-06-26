@@ -144,8 +144,8 @@ namespace Engineering_Calculator
                     case (1, 1):
                         word += c;
                         break;
-                    case (1, 2):
-                        if (!number.IsMatch(word)) //met operation - check word
+                    case (1, 2):                   //met operation - check word
+                        if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.') 
                             return false;
                         wordType = 2;              //change word type to new one
                         word = "";                 //clear word
@@ -159,6 +159,8 @@ namespace Engineering_Calculator
                         word += c;
                         break;
                     case (1, 5):
+                        if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.')
+                            return false;
                         wordType = 5;
                         word = "";
                         word += c;
@@ -225,7 +227,7 @@ namespace Engineering_Calculator
             {
                 case 0: return false;
                 case 1:
-                    if (!number.IsMatch(word))
+                    if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.')
                         return false;
                     break;
                 case 2: return false;
@@ -301,12 +303,11 @@ namespace Engineering_Calculator
             expression = expression.Replace("-+", "-");
 
             if (expression[0] == '-') expression = "0" + expression;
-
             expression = Calculate(sequences["add-sub"], expression, 0);
 
             if (Regex.IsMatch(expression, sequences["sci-number"]))
                 result = Double.Parse(expression, CultureInfo.InvariantCulture);
-            else 
+            else
             {
                 currentRecursiveCalls++;
                 result = Calculate(expression);
@@ -351,17 +352,17 @@ namespace Engineering_Calculator
         }
 
         //finds sequences in expression string by specified pattern argument
-        //calls check of expression before that
         static string Calculate(string sequenceStr, string expression, int operationType)
         {
-            exCheck(expression);
+            exCheck(expression); //to check if wrong opperands appeared in expression during calculation
             Regex sequence = new Regex(sequenceStr);
             MatchCollection sequences = sequence.Matches(expression);
             foreach (Match s in sequences)
                 expression = expression.Replace(s.Value, Calculate(s, operationType));
             sequences = sequence.Matches(expression);
             if (sequences.Count > 0)
-            {   //calculated sequnce replaced in expression creates the same one sequnce
+            {   
+                //calculated sequnce replaced in expression creates the same one sequnce
                 currentRecursiveCalls++;
                 expression = Calculate(sequenceStr, expression, operationType);
             }
@@ -371,7 +372,7 @@ namespace Engineering_Calculator
         //calculates sequenses of same priority replacing them with fractional number represented in a string
         static string Calculate(Match sequence, int operationType)
         {
-            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign (consider pos-sci number)
+            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign
             MatchCollection numbers, operations;
             double result;
             string resultS;

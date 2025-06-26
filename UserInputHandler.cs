@@ -15,13 +15,14 @@ namespace Engineering_Calculator
     //in form of redrawing or Calculation() instance 
     internal class UserInputHandler
     {
-        public UserInputHandler(FormElement element, ErrorFactory _errFactory, ExceptionHandler _exHandler)
+        public UserInputHandler(CustomTextField _textFiled, ErrorFactory _errFactory, ExceptionHandler _exHandler)
         {
             result = String.Empty;
             key = String.Empty;
             lastAnswer = "0";
             IsLocked = false;
-            textField = element;
+            textField = _textFiled;
+ 
             errFactory = _errFactory;
             exHandler = _exHandler;
             product = null;
@@ -32,11 +33,10 @@ namespace Engineering_Calculator
         //fields
         private string result, key, lastAnswer;
         private bool isLocked;
-        private FormElement textField;
+        private CustomTextField textField;
         private readonly ErrorFactory errFactory;
         private readonly ExceptionHandler exHandler;
         private Calculation product;
-
 
         public bool IsLocked { get => isLocked; set => isLocked = value; }
         public ExceptionHandler ExHandler => exHandler;
@@ -46,7 +46,7 @@ namespace Engineering_Calculator
 
         //methods
 
-        //adds string to caption
+        //adds string to inputCaption
         public void AddToCaption(string addition, Graphics g)
         {
             if (textField != null)
@@ -56,7 +56,7 @@ namespace Engineering_Calculator
             }
         }
 
-        //subtracts one symbol from textField's caption
+        //subtracts one symbol from textField's inputCaption
         public void SubtractFromCaption(Graphics g)
         {
             if (textField.Caption != String.Empty)
@@ -66,7 +66,7 @@ namespace Engineering_Calculator
             }
         }
 
-        //changes caption of text field depending on result of Calculate() 
+        //changes inputCaption of text field depending on result of Calculate() 
         //function (result string or exeption message), lockes if catches 
         //exeption or invalid expression message, displaying related message 
         public void CalculateCaption(Graphics g)
@@ -79,23 +79,23 @@ namespace Engineering_Calculator
                 result = Convert.ToString(Product.Result);
                 textField.Caption = result.Replace(",", ".");
                 lastAnswer = textField.Caption;
+                textField.UpperCaption = "ans = " + lastAnswer;
             }
             catch (Exception ex) 
             {
                 ExHandler.HandleException(ex);
                 IsLocked = true;
+                textField.UpperCaption = String.Empty;
             }
             textField.Draw(g);
         }
 
-        //clears caption of textField, and unlocks itself (UserInputHandler() instance)
+        //clears inputCaption of textField, and unlocks itself (UserInputHandler() instance)
         public void ClearCaption(Graphics g)
         {
-            if (textField.Caption != String.Empty)
-            {
                 textField.Caption = String.Empty;
+                textField.UpperCaption = String.Empty;
                 textField.Draw(g);
-            }
         }
 
         //handles input with pressed shift button (implementation in CalculatorCore.cs)
@@ -199,10 +199,7 @@ namespace Engineering_Calculator
                 if (e.KeyCode == Keys.Oemcomma)
                     AddToCaption(".", g);
                 if (e.KeyCode == Keys.Delete)
-                {
-                    textField.Caption = String.Empty;
-                    textField.Draw(g);
-                }
+                    ClearCaption(g);
             }
         }
 
@@ -252,12 +249,21 @@ namespace Engineering_Calculator
                     AddToCaption("sqrt(", g);
                     break;
                 case "ans":
-                    ClearCaption(g);
                     AddToCaption(lastAnswer, g);
                     break;
                 case "=":
                     product = new Calculation();
                     CalculateCaption(g);
+                    break;
+                case "HistoryButton":
+                    System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+                    try { System.Diagnostics.Process.Start("history.txt"); }
+                    catch (Exception ex)
+                    {
+                        ExHandler.HandleException(ex);
+                        IsLocked = true;
+                        textField.UpperCaption = String.Empty;
+                    }
                     break;
                 default:
                     AddToCaption(button.Caption, g);
@@ -282,5 +288,6 @@ namespace Engineering_Calculator
                     break;
             }
         }
+
     }
 }

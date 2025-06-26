@@ -29,7 +29,7 @@ namespace Engineering_Calculator
         //fields
         Graphics g;
         CalculatorCore core;
-
+        
         //methods
 
         //allocating resources for form usage

@@ -39,17 +39,20 @@ namespace Engineering_Calculator
         //initiallizes formElements, filling their fields
         public void FormElementsInit()
         {
-            ElementsUI = new FormElement[35];
-            int bXPosition = -25, bYPosition = 150, bWidth = 75, bHeight = 75;
+            ElementsUI = new FormElement[36];
+            int bXPosition = 50, bYPosition = 150, bWidth = 75, bHeight = 75;
             int rowButtonCounter = 0;
 
             for (int i = 0; i < ElementsUI.Length; i++)
             {
                 if (i == 0)
                     ElementsUI[i] = new CustomTextField();
+                else if(i==1)
+                    ElementsUI[i] = new HistoryButton();
                 else
                 {
-                    ElementsUI[i] = new CustomButton(bXPosition, bYPosition, bWidth, bHeight, buttonCaptions[i - 1]);
+                    ElementsUI[i] = new CustomButton(bXPosition, bYPosition, bWidth, bHeight, buttonCaptions[i - 2]);
+                    bXPosition += 75;
                     rowButtonCounter++;
                 }
                 if (rowButtonCounter == 9)
@@ -57,23 +60,22 @@ namespace Engineering_Calculator
                     bYPosition += 75;
                     bXPosition = 50;
                     rowButtonCounter = 0;
-                }
-                else
-                    bXPosition += 75;
+                }      
             }
+            var textFiled = GetCustomTextField();
+            textFiled.HButtonToDraw = ElementsUI[1];
         }
 
         //returns user input field
-        public FormElement GetCustomTextField()
+        public CustomTextField GetCustomTextField()
         {
-            FormElement textField = null;
+            CustomTextField textField = null;
             for (int i = 0; i < ElementsUI.Length; i++)
                 if (ElementsUI[i].GetTypeString() == "CustomTextField")
                 { 
-                    textField = ElementsUI[i];
+                    textField = ElementsUI[i] as CustomTextField;
                     break;
                 }
-                    
             if (textField == null) 
                 throw new ArgumentNullException("failed to initiallize FormElement:CustomTextField");
 
