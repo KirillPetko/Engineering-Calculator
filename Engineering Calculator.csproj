@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="Calculation.cs" />
     <Compile Include="CalculatorCore.cs" />
+    <Compile Include="ErrorFactory.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="CustomButton.cs" />
     <Compile Include="CustomTextField.cs" />
@@ -88,7 +89,10 @@
       <DependentUpon>CalculatorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ErrorLogger.cs" />
+    <Compile Include="FileManager.cs" />
+    <Compile Include="ContainerManager.cs" />
     <Compile Include="FormElement.cs" />
+    <Compile Include="HistoryButton.cs" />
     <Compile Include="IExceptionObserver.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

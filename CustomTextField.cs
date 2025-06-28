@@ -16,59 +16,65 @@ namespace Engineering_Calculator
         public CustomTextField() 
         {
             X = 50;
-            Y = 50;
+            Y = 30;
             Width = 675; 
-            Height = 50;
+            Height = 80;
             Caption = String.Empty;
-        }
-        public CustomTextField(int _x, int _y, int _width, int _height, string _caption)
-        {
-            X = _x;
-            Y = _y;
-            Width = _width;
-            Height = _height;
-            Caption = _caption;
+            UpperCaption = String.Empty;    
+
+            rect = new Rectangle(x, y, width, height);
+            backgroundBrush = new SolidBrush(Color.Black);
+            inputBrush = new SolidBrush(Color.Orange);
+            upperBrush = new SolidBrush(Color.LimeGreen);
+            inputFont = new Font("Consolas", 30);//even character width and height
+            upperFont = new Font("Consolas", 15);
         }
 
         private int x;
         private int y;
         private int width;
         private int height;
-        private string caption;
+        private string inputCaption;
+        private string upperCaption;
+        private Rectangle rect;
+        private Brush backgroundBrush, inputBrush, upperBrush;
+        private Font inputFont, upperFont;
+        private FormElement hButtonToDraw;
 
         public override int X { get => x; set => x = value; }
         public override int Y { get => y; set => y = value; }
         public override int Width { get => width; set => width = value; }
         public override int Height { get => height; set => height = value; }
-        public override string Caption { get => caption; set => caption = value; }
+        public override string Caption { get => inputCaption; set => inputCaption = value; }
+        public string UpperCaption { get => upperCaption; set => upperCaption = value; }
+        internal FormElement HButtonToDraw { get => hButtonToDraw; set => hButtonToDraw = value; }
+
+        public override string GetTypeString()
+        {
+            return "CustomTextField";
+        }
 
         public override void Draw(Graphics g)
         {
-            Rectangle rect;
-            Brush brush;
-            Brush brush1;
-            Font fnt;
+            string visibleCaption = String.Empty;
 
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            rect = new Rectangle(x, y, width, height);
-            brush = new SolidBrush(Color.Black);
-            brush1 = new SolidBrush(Color.Orange);
-            fnt = new System.Drawing.Font("Consolas", (float)20);//even character length
 
-            g.FillRectangle(brush, rect);
-            if (Caption.Length <= 43)
-                g.DrawString(Caption, fnt, brush1, x + 10, y + 5);
+
+            g.FillRectangle(backgroundBrush, rect);
+            if (Caption.Length <= 29)
+                visibleCaption = inputCaption;
             else
             {
-                string visibleCaption = caption;
-                visibleCaption = visibleCaption.Substring(visibleCaption.Length - 43);
-                g.DrawString(visibleCaption, fnt, brush1, x + 10, y + 5);
+                visibleCaption = inputCaption;
+                visibleCaption = visibleCaption.Substring(visibleCaption.Length - 29);
             }
-            fnt.Dispose();
-            brush.Dispose();
-            brush1.Dispose();
+            g.DrawString(visibleCaption, inputFont, inputBrush, x + 3, y + 30);
+            g.DrawString(upperCaption, upperFont, upperBrush, x + 8, y + 5);
+
+            hButtonToDraw.Draw(g);
         }
     }
 }

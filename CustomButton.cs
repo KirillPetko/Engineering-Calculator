@@ -25,6 +25,14 @@ namespace Engineering_Calculator
             Width = _width;
             Height = _height;
             Caption = _caption;
+
+            if (caption == "C" || caption == "<-")
+                brush = new SolidBrush(Color.Red);
+            else
+                brush = new SolidBrush(Color.Black);
+            fnt = new System.Drawing.Font("Consolas", (float)17);
+            pen = new Pen(Color.Black, 1);
+            border = new Rectangle(x, y, width, height);
         }
 
         private int x;
@@ -33,42 +41,35 @@ namespace Engineering_Calculator
         private int height;
         private string caption;
 
+        Rectangle border;
+        Brush brush;
+        Font fnt;
+        Pen pen;
+
         public override int X { get => x; set => x = value; }
         public override int Y { get => y; set => y = value; }
         public override int Width { get => width; set => width = value; }
         public override int Height { get => height; set => height = value; }
         public override string Caption { get => caption; set => caption = value; }
-
+        public override string GetTypeString()
+        {
+            return "CustomButton";
+        }
 
         public override void Draw(Graphics g)
         {
-            Rectangle border;
-            Brush brush;
-            Font fnt;
-            Pen pen;
-
-            if (caption == "C" || caption == "<-")
-                brush = new SolidBrush(Color.Red);
-            else
-                brush = new SolidBrush(Color.Black);
-            fnt = new System.Drawing.Font("SansSerif", (float)15);
-            pen = new Pen(Color.Black, 1);
-            border = new Rectangle(x, y, width, height);
             g.DrawRectangle(pen, border);
 
-            //centring caption in button rectangle by caption length
+            //centring inputCaption in button rectangle by inputCaption length
             if (caption.Length == 1) 
-                g.DrawString(caption, fnt, brush, x + 30, y+25);
+                g.DrawString(caption, fnt, brush, x + 27, y+25);
             else if (caption.Length == 2)
-                g.DrawString(caption, fnt, brush, x + 25, y + 25);
+                g.DrawString(caption, fnt, brush, x + 22, y + 25);
             else if(caption.Length == 3)
-                g.DrawString(caption, fnt, brush, x + 20, y + 25);
-            else if(caption.Length == 4)
                 g.DrawString(caption, fnt, brush, x + 15, y + 25);
+            else if(caption.Length == 4)
+                g.DrawString(caption, fnt, brush, x + 8, y + 25);
 
-            brush.Dispose();
-            fnt.Dispose();
-            pen.Dispose();
         }
     }
 }

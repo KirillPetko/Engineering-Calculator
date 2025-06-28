@@ -22,6 +22,7 @@ namespace Engineering_Calculator
         public abstract int Width { get; set; }
         public abstract int Height { get; set; }
         public abstract string Caption { get; set; }
+        public abstract string GetTypeString();
         public abstract void Draw(Graphics g);
         public bool CheckPoint(int pointX, int pointY)
         {
