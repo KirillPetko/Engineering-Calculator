@@ -78,6 +78,9 @@
   <ItemGroup>
     <Compile Include="Calculation.cs" />
     <Compile Include="CalculatorCore.cs" />
+    <Compile Include="CalculatorHistoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ErrorFactory.cs" />
     <Compile Include="ExceptionHandler.cs" />
     <Compile Include="CustomButton.cs" />
@@ -89,6 +92,7 @@
       <DependentUpon>CalculatorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ErrorLogger.cs" />
+    <Compile Include="ExpressionValidator.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="ContainerManager.cs" />
     <Compile Include="FormElement.cs" />

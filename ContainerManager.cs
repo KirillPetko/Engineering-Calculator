@@ -21,18 +21,13 @@ namespace Engineering_Calculator
             };
             FormElementsInit();
             calculations = new List<Calculation> { };
-            fM = new FileManager();
         }
         private FormElement[] elementsUI;
         private string[] buttonCaptions;
         private readonly List<Calculation> calculations;
-        private readonly FileManager fM;
 
         internal FormElement[] ElementsUI { get => elementsUI; set => elementsUI = value; }
         internal List<Calculation> Calculations => calculations;
-
-        internal FileManager FM => fM;
-
 
         //methods
 
@@ -101,7 +96,7 @@ namespace Engineering_Calculator
                 }
             }
             if(!String.IsNullOrEmpty(expToSave))
-                fM.RecordCalculation(expToSave);
+                FileManager.RecordCalculation(expToSave);
         }
     }
 }
