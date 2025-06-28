@@ -27,16 +27,18 @@ namespace Engineering_Calculator
         }
        
         //fields
-        Graphics g;
-        CalculatorCore core;
-        
+        private Graphics g;
+        private CalculatorCore core;
+        private CalculatorHistoryForm historyForm;
+
         //methods
 
         //allocating resources for form usage
         private void CalculatorForm_Load(object sender, EventArgs e)
         {
             g = CreateGraphics();
-            core = new CalculatorCore(this.Width, this.Height);
+            core = new CalculatorCore(this.Width, this.Height, g);
+            core.HandlerUI.HistoryRequested += ShowHistoryForm; //subscribing to event of UserInputHandler
         }
 
         //creating visual representation of bitmap on paint event
@@ -46,16 +48,27 @@ namespace Engineering_Calculator
         }
         private void CalculatorForm_KeyDown(object sender, KeyEventArgs e)
         {
-            core.InvokeKeyHandler(e, g);
+            core.InvokeKeyHandler(e);
         }
         private void CalculatorForm_MouseClick(object sender, MouseEventArgs e)
         {
-            core.InvokeClickHandler(e, g);
+            core.InvokeClickHandler(e);
         }
         private void CalculatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             g.Dispose();
             core.Buffer.Dispose();
+            if(historyForm!=null)
+                historyForm.Dispose();
+        }
+
+        private void ShowHistoryForm()
+        {
+            historyForm = new CalculatorHistoryForm(core.Containers.Calculations);
+            historyForm.Owner = this;
+            historyForm.StartPosition = FormStartPosition.Manual;
+            historyForm.Location = new Point(this.Location.X, this.Location.Y);
+            historyForm.Show();
         }
     }
 }

@@ -10,11 +10,9 @@ namespace Engineering_Calculator
     internal class ErrorLogger : IExceptionObserver
     {
         public ErrorLogger() 
-        { 
-            fileManager = new FileManager(); 
+        {  
             msg = String.Empty;
         }
-        FileManager fileManager;
         string msg;
         public void OnException(Exception e)
         {
@@ -48,7 +46,7 @@ namespace Engineering_Calculator
                 e.Data.Add("DateTimeInfo", DateTime.Now);
                 msg = e.Data["DateTimeInfo"] + "\t" + e.Message + "\t" + e.GetType();
             }
-            fileManager.LogException(msg);
+            FileManager.LogException(msg);
         }
     }
 }

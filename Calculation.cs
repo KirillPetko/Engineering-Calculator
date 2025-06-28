@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,26 +11,26 @@ using System.Threading.Tasks;
 
 namespace Engineering_Calculator
 {
-    //Class responsible for making emptyCalculation from expression string as well as validating it
+    //Class responsible for recurrently shortening (calculating) expression string as well as validating it
     internal class Calculation
     {
         public Calculation() 
         {
-        
+            IsValidExpression = false;
         }
-        public Calculation(string _input, ErrorFactory _errFactory)
+        public Calculation(string _input)
         {
             Input = _input;
-            errFactory = _errFactory;
-            IsValid = Verify(input);
-            if (IsValid)
+            IsValidExpression = 
+                ExpressionValidator.VerifyExpression(input, sequences["pos-number"], sequences["one-sign-opr"], sequences["all-math-opr"]);
+            if (IsValidExpression)
             {
                 Expression = Input;
                 Result = Calculate(Expression);
             }
             else
             {
-                Exception e = errFactory.CreateCalculationException("Invalid input", "FormatException", _input, _input);
+                Exception e = ErrorFactory.CreateCalculationException("Invalid input", "FormatException", _input, _input);
                 throw e;
             }
         }
@@ -37,12 +38,10 @@ namespace Engineering_Calculator
         private const int MAX_RECURSIVE_CALLS = 250;
         private static int currentRecursiveCalls = 0;
 
-        private static string input;
+        private string input;
         private string expression;
-        private bool isValid;
+        private bool isValidExpression;
         private double result;
-        private static ErrorFactory errFactory;
-        
 
         private static Dictionary<string, string> sequences = new Dictionary<string, string>
         {
@@ -67,178 +66,21 @@ namespace Engineering_Calculator
             ["all-math-opr"] = "sin|cos|tan|asin|acos|atan|ln|log|sqrt",
         };
 
-        public static string Input
+        public string Input
         {
             get
             {
-                return input;
+                return this.input;
             }
             set
             {
                 if (value == String.Empty) input = "0";
-                else input = value;
+                else this.input = value;
             }
         }
         public string Expression { get => expression; set => expression = value; }
-        public bool IsValid { get => isValid; set => isValid = value; }
+        public bool IsValidExpression { get => isValidExpression; set => isValidExpression = value; }
         public double Result { get => result; set => result = value; }
-
-        //function to parse an expression string in order to check its validity
-        static bool Verify(string expression)
-        {
-            if (expression == String.Empty) return false;
-
-            Regex number = new Regex(sequences["pos-number"]);
-            Regex signOperation = new Regex(sequences["one-sign-opr"]);
-
-            string word = "";
-            int wordType = 0;   //0 - not assigned 1 - number 2 - sign 3 - text operation 4 - bracket "(.." 5 - "..)"
-            int charType = 0;   //0 - not assigned 1 - digit 2 - sign 3 - letter 4 - parentesis '(' 5 - ')'
-            char c = expression[0];
-            int openedBracketsCount = 0;
-            int closedBracketsCount = 0;
-
-            if (!Char.IsLetter(c) && !Char.IsDigit(c) && c != '-' && c != '(') 
-                return false;
-            for (int i = 0; i < expression.Length; i++)
-            {
-                c = expression[i];
-                if (c == '(') openedBracketsCount++;
-                if (c == ')') closedBracketsCount++;
-
-                //word is not yet assigned 
-                if (wordType == 0)                      
-                {
-                    if (Char.IsDigit(c)) wordType = 1;
-                    else if (c == '-') wordType = 2;
-                    else if (Char.IsLetter(c)) wordType = 3;
-                    else if (c == '(') wordType = 4;
-                    else return false;
-
-                    word += c;
-                    if (i == expression.Length - 1)
-                    {
-                        if (c == '(') 
-                            return false;
-                        else if (Char.IsLetter(c))
-                            return false;
-                        //end of expression reached - it must be a single number
-                        else return true;
-                    }
-                    else
-                        i++;
-                    c = expression[i];
-                    if (c == '(') openedBracketsCount++;
-                    if (c == ')') closedBracketsCount++;
-                }
-                if (Char.IsDigit(c) || c == '.') charType = 1;
-                else if (c == '*' || c == '/' || c == '+' || c == '-' || c == '^') charType = 2;
-                else if (Char.IsLetter(c)) charType = 3;
-                else if (c == '(') charType = 4;
-                else if (c == ')') charType = 5;
-                else return false;
-
-
-                switch (wordType, charType)
-                {
-                    case (1, 1):
-                        word += c;
-                        break;
-                    case (1, 2):                   //met operation - check word
-                        if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.') 
-                            return false;
-                        wordType = 2;              //change word type to new one
-                        word = "";                 //clear word
-                        word += c;                 //add 1st letter to the new word
-                        break;
-                    case (1, 3):
-                        if (!number.IsMatch(word))
-                            return false;
-                        wordType = 3;
-                        word = "";
-                        word += c;
-                        break;
-                    case (1, 5):
-                        if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.')
-                            return false;
-                        wordType = 5;
-                        word = "";
-                        word += c;
-                        break;
-                    case (2, 1):
-                        if (!signOperation.IsMatch(word))
-                            return false;
-                        wordType = 1;
-                        word = "";
-                        word += c;
-                        break;
-                    case (2, 2): return false;      //this case means sign contents more than 1 letter
-                    case (2, 3):
-                        if (!signOperation.IsMatch(word))
-                            return false;
-                        wordType = 3;
-                        word = "";
-                        word += c;
-                        break;
-                    case (2, 4):
-                        wordType = 4;
-                        word = "";
-                        word += c;
-                        break;
-                    case (2, 5): return false;      //sign before ')' -> Invalid expression
-                    case (3, 3):
-                        word += c;
-                        break;
-                    case (3, 1): return false;      //after text opreation only opened bracket (char type 4)
-                    case (3, 2): return false;
-                    case (3, 4):
-                        wordType = 4;
-                        word = "";
-                        word += c;
-                        break;
-                    case (4, 1):
-                        wordType = 1;
-                        word = "";
-                        word += c;
-                        break;
-                    case (4, 2):
-                        if (c != '-') return false; //any sign after '(' exept '-' -> Invalid expression
-                        break;
-                    case (4, 3):                    //no need to check word type for parenteses
-                        wordType = 3;
-                        word = "";
-                        word += c;
-                        break;
-                    case (4, 4): break;             //"((" possible sequence -> break to avoid false return
-                    case (4, 5): return false;      //"()" - empty parentesises -> Invalid expression
-                    case (5, 1): return false;      //number after ')' -> Invalid expression
-                    case (5, 2):
-                        wordType = 2;
-                        word = "";
-                        word += c;
-                        break;
-                    case (5, 3): return false;      //text after ) -> Invalid expression
-                    case (5, 4): return false;      //")(" -> Invalid expression
-                    case (5, 5): break;             //"))" possible sequence -> break to avoid false return
-                    default: return false;
-                }
-            }
-            switch (wordType)                       //last word check (valid cases have a break operator)
-            {
-                case 0: return false;
-                case 1:
-                    if (!number.IsMatch(word) || countChr(word, '.') > 1 || word[0] == '.')
-                        return false;
-                    break;
-                case 2: return false;
-                case 3: return false;
-                case 4: return false;
-                case 5: break;
-                default: return false;
-            }
-            if (openedBracketsCount != closedBracketsCount) return false;
-            return true;
-        }
 
         /*
         * function which takes a string in form of expression, then open brackets,
@@ -250,7 +92,7 @@ namespace Engineering_Calculator
          * throws an exeption or continues by recurrent enter untill expression
          * becomes a double-passable string, then it returns a result of that pasing 
          */
-        static double Calculate(string expression)
+        private double Calculate(string expression)
         {
             double result;
             List<int> openedBracketsIndexes = new List<int>();
@@ -318,7 +160,7 @@ namespace Engineering_Calculator
 
         //opens corresponding bracket pair in expression calculating inner expression,
         //considering power operation after to avoid broken sequences
-        static string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
+        private string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
         {
             
             double subresult;
@@ -352,7 +194,7 @@ namespace Engineering_Calculator
         }
 
         //finds sequences in expression string by specified pattern argument
-        static string Calculate(string sequenceStr, string expression, int operationType)
+        private string Calculate(string sequenceStr, string expression, int operationType)
         {
             exCheck(expression); //to check if wrong opperands appeared in expression during calculation
             Regex sequence = new Regex(sequenceStr);
@@ -483,43 +325,35 @@ namespace Engineering_Calculator
 
         //checks an expression string on validity (called during callculation)
         //and amount of recursive calls, throws propper exeptions
-        static void exCheck(string expression)
+        public void exCheck(string expression)
         {
             Exception e;
             Regex opr = new Regex(sequences["one-sign-opr"]);
             MatchCollection oprs = opr.Matches(expression);
-            bool alotOfSci = countChr(expression, 'E') > 1,
-                 sciOperation = countChr(expression, 'E') == 1 && oprs.Count > 1;
+            bool alotOfSci = ExpressionValidator.countChar(expression, 'E') > 1,
+                 sciOperation = ExpressionValidator.countChar(expression, 'E') == 1 && oprs.Count > 1;
 
             if (currentRecursiveCalls == MAX_RECURSIVE_CALLS)
             {
                 currentRecursiveCalls = 0;
-                e = errFactory.CreateCalculationException("Failed calculating expression", "StackOverflowException", expression, input);
+                e = ErrorFactory.CreateCalculationException("Failed calculating expression", "StackOverflowException", expression, input);
                 throw e;
             }
             else if (expression.Contains("NaN"))
             {
-                e = errFactory.CreateCalculationException("NaN value", "ArithmeticException", expression, input);
+                e = ErrorFactory.CreateCalculationException("NaN value", "ArithmeticException", expression, input);
                 throw e;
             }
             else if (expression.Contains("Infinity"))
             {
-                e = errFactory.CreateCalculationException("Infinity", "ArithmeticException", expression, input);
+                e = ErrorFactory.CreateCalculationException("Infinity", "ArithmeticException", expression, input);
                 throw e;
             }
             else if (alotOfSci || sciOperation)
             {
-                e = errFactory.CreateCalculationException("Wrong operands format", "ArithmeticException", expression, input);
+                e = ErrorFactory.CreateCalculationException("Wrong operands format", "ArithmeticException", expression, input);
                 throw e;
             }
-        }
-        static int countChr(string source, char toFind)
-        {
-            int count = 0;
-            foreach (char c in source)
-                if(c==toFind)
-                    count++;
-            return count;
         }
     }
 }
