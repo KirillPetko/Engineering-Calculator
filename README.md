@@ -17,7 +17,7 @@ If any exeption message, or "Invalid expression" message appears, proceed to cle
 DEL button on your keyboard or 'C' button on GUI.<br />
 <br />
 <strong>Commands</strong><br />
-Commands can be diled and performed from input field. Currently avaliable:<br />
+Can be diled and performed from input field. Currently avaliable:<br />
 <code style="color : darkorange">-log</code> - opens log.txt.<br />
 <code style="color : darkorange">-history</code> - opens history.txt.<br />
 <code style="color : darkorange">-deletelog</code> - removes log.txt.<br />
