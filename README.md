@@ -16,6 +16,15 @@ Any letters, numbers, or operation symbols. Backspace deletes one symbol, DEL cl
 If any exeption message, or "Invalid expression" message appears, proceed to clear input field by<br />
 DEL button on your keyboard or 'C' button on GUI.<br />
 <br />
+<strong>Commands</strong><br />
+Commands can be diled and performed from input field. Currently avaliable:<br />
+<code style="color : darkorange">-log</code> - opens log.txt.<br />
+<code style="color : darkorange">-history</code> - opens history.txt.<br />
+<code style="color : darkorange">-deletelog</code> - removes log.txt.<br />
+<code style="color : darkorange">-deletehistory</code> - removes history.tx.<br />
+<code style="color : darkorange">-dark</code> - switches to dark theme.<br />
+<code style="color : darkorange">-default</code> - switches to default theme.<br />
+<br />
 <strong>Exeption types</strong><br />
 1.<code style="color : darkorange">Invalid input</code> - input expression does not correspond to rules described above.<br />
 2.<code style="color : darkorange">Wrong operands format</code> - means that on or more operands in expression acquired a sientific notation in process of calculation (double operand has more than fifteen digits).Note that expression after calculation has only obe such number it will be displayed as result.<br />
@@ -23,5 +32,7 @@ DEL button on your keyboard or 'C' button on GUI.<br />
 4.<code style="color : darkorange">Infinity</code> - calculated expression contains Infinity (positive or negative one).<br />
 5.<code style="color : darkorange">Failed calculating expression</code> - exeded recurent entrance limit(either fails to shorten expression, passing it again or amount parentesis is too high. MAX_RECURSIVE_CALLS = 250).<br />
 <br />
-<strong>Logging</strong><br />
+<strong>Logging and history</strong><br />
 Currently log file is called "log.txt", it contains formed error messages in format: [data]  [message]  [user input]  [string which caused error]. Causing error string could appear during calculation process, so it may differ from user input.<br />
+Full history contained in "history.txt" in form of time of saving to file, valid user input = result.<br />
+History of a runtime can be shown in dedicated form by clicking on history button, drawn on input field.<br />
