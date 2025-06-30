@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Engineering Calculator.exe" size="96216">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Engineering Calculator.exe" size="101848">
       <assemblyIdentity name="Engineering Calculator" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>/e7USg0IDtCG6fav2X2OaZ4JM5kcT8p8qhQ9XVPxQo4=</dsig:DigestValue>
+        <dsig:DigestValue>ZKaTpTyHAGhxnmdTr6CqrfevqFvjoCY72kFxFqg0NVU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

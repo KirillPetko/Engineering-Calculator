@@ -37,8 +37,12 @@ namespace Engineering_Calculator
         private void CalculatorForm_Load(object sender, EventArgs e)
         {
             g = CreateGraphics();
-            core = new CalculatorCore(this.Width, this.Height, g);
-            core.HandlerUI.HistoryRequested += ShowHistoryForm; //subscribing to event of UserInputHandler
+            core = new CalculatorCore(this.Width, this.Height, g, new DefaultThemeFactory());
+
+            //subscribing to events of UserInputHandler
+            core.HandlerUI.HistoryRequested += ShowHistoryForm;
+            core.HandlerUI.DefaultThemeRequested += ShowDefaultTheme;
+            core.HandlerUI.DarkThemeRequested += ShowDarkTheme;
         }
 
         //creating visual representation of bitmap on paint event
@@ -69,6 +73,18 @@ namespace Engineering_Calculator
             historyForm.StartPosition = FormStartPosition.Manual;
             historyForm.Location = new Point(this.Location.X, this.Location.Y);
             historyForm.Show();
+        }
+
+        private void ShowDefaultTheme()
+        {
+            BackColor = Color.White;
+            core.ChangeTheme(new DefaultThemeFactory());
+        }
+
+        private void ShowDarkTheme()
+        {
+            BackColor = Color.FromArgb(21, 21, 21);
+            core.ChangeTheme(new DarkThemeFactory());
         }
     }
 }

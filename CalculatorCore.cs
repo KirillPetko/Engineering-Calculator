@@ -12,7 +12,7 @@ namespace Engineering_Calculator
     //also implements initialization
     internal class CalculatorCore
     {
-        public CalculatorCore(int _width, int _height, Graphics _g) 
+        public CalculatorCore(int _width, int _height, Graphics _g, IFormElementFactory _factory) 
         {
             //supposed to be Form's w and h
             width = _width; 
@@ -20,10 +20,16 @@ namespace Engineering_Calculator
             Buffer = new Bitmap(width, height);
             g = _g;
 
-            Containers = new ContainerManager();
+            Factory = _factory;
+            Containers = new ContainerManager(Factory);
             UpdateBitmap();
 
             exHandler = new ExceptionHandler();
+            errLogger = new ErrorLogger();
+            usrNotification = new UserNotification(Containers.GetCustomTextField());
+            exHandler.AddObserver(errLogger);
+            exHandler.AddObserver(usrNotification);
+
             HandlerUI = new UserInputHandler(Containers.GetCustomTextField(), exHandler, g);
         }
 
@@ -33,6 +39,9 @@ namespace Engineering_Calculator
         private ContainerManager сontainers;
         private Bitmap buffer; //implemented for faster drawing
         private readonly ExceptionHandler exHandler;
+        private ErrorLogger errLogger;
+        private UserNotification usrNotification;
+        private IFormElementFactory factory;
         
 
         private int width; 
@@ -43,6 +52,7 @@ namespace Engineering_Calculator
         public Bitmap Buffer { get => buffer; set => buffer = value; }
         public ExceptionHandler ExHandler => exHandler;
         internal ContainerManager Containers { get => сontainers; set => сontainers = value; }
+        public IFormElementFactory Factory { get => factory; set => factory = value; }
 
         public void UpdateBitmap()
         {
@@ -55,10 +65,8 @@ namespace Engineering_Calculator
                 //increasing smoothnes of writen text
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                //foreach (FormElement element in Containers.ElementsUI)
-                //    element.Draw(graphics);
-                for (int i = 0;i< Containers.ElementsUI.Length;i++)
-                    Containers.ElementsUI[i].Draw(graphics);
+                foreach (FormElement element in Containers.ElementsUI)
+                    element.Draw(graphics);
             }
         }
         //passes key data to UserInputHandler() instance
@@ -73,7 +81,7 @@ namespace Engineering_Calculator
                 { 
                     Containers.Calculations.Add(HandlerUI.Product);
                     Containers.SaveLastCalculationToTextFile();
-                    HandlerUI.Product = null;
+                    handlerUI.Product = null;
                 }   
             }
             if (HandlerUI.IsLocked && e.KeyCode == Keys.Delete)
@@ -114,6 +122,18 @@ namespace Engineering_Calculator
                     }  
                 }
             UpdateBitmap();
+        }
+
+        public void ChangeTheme(IFormElementFactory _factory)
+        { 
+            Containers.Factory = _factory;
+            Containers.FormElementsInit();
+
+            var textField = Containers.GetCustomTextField();
+            HandlerUI.ExHandler.RemoveObserver(usrNotification);
+            usrNotification = new UserNotification(textField);
+            HandlerUI.ExHandler.AddObserver(usrNotification);
+            HandlerUI.TextField = textField;  
         }
 
     }

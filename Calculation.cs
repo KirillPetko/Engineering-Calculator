@@ -7,11 +7,12 @@ using System.Runtime.Remoting.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 
 namespace Engineering_Calculator
 {
-    //Class responsible for recurrently shortening (calculating) expression string as well as validating it
+    //responsible for recurrently shortening (calculating) expression string as well as validating it
     internal class Calculation
     {
         public Calculation() 
@@ -22,7 +23,7 @@ namespace Engineering_Calculator
         {
             Input = _input;
             IsValidExpression = 
-                ExpressionValidator.VerifyExpression(input, sequences["pos-number"], sequences["one-sign-opr"], sequences["all-math-opr"]);
+                CalculationValidator.VerifyInput(input, sequencePatterns["pos-number"], sequencePatterns["all-math-opr"]);
             if (IsValidExpression)
             {
                 Expression = Input;
@@ -35,15 +36,13 @@ namespace Engineering_Calculator
             }
         }
 
-        private const int MAX_RECURSIVE_CALLS = 250;
         private static int currentRecursiveCalls = 0;
-
         private string input;
         private string expression;
         private bool isValidExpression;
         private double result;
 
-        private static Dictionary<string, string> sequences = new Dictionary<string, string>
+        private static Dictionary<string, string> sequencePatterns = new Dictionary<string, string>
         {
             //sequences of type:
             ["sci-number"] = "(\\-)?\\d+[\\.?\\d]*([eE][-+]?[0-9]+)?", //fractional number, or in sientific notation
@@ -83,14 +82,13 @@ namespace Engineering_Calculator
         public double Result { get => result; set => result = value; }
 
         /*
-        * function which takes a string in form of expression, then open brackets,
-         * taking inner string as argument to genereted recurrent entrance of itself
-         * then it divides expression in sequences with priorities of operations while
-         * callcucating them sequentially with the help of overloaded examples of itself
-         * it also adds 0 in the beginning not to break further emptyCalculation process as well
-         * as checking validity of gotten result before returning it, otherwise this function 
-         * throws an exeption or continues by recurrent enter untill expression
-         * becomes a double-passable string, then it returns a result of that pasing 
+         * function which takes a string in form of expression, then open brackets,
+         * taking inner string as argument to recurrent entrance of itself then
+         * divides expression in sequencePatterns with priorities of operations
+         * callcucating them sequentially with the help of overloaded examples. 
+         * Also adds 0 in the beginning not to break further calculation process.  
+         * If calculated sequence has signs continues by recurrent enter untill expression
+         * becomes a double-parssable string, then returns a result of that parsing 
          */
         private double Calculate(string expression)
         {
@@ -116,7 +114,7 @@ namespace Engineering_Calculator
                     }
 
                 }
-                else //')' is at the end of the expression
+                else   //')' is at the end of the expression
                 {
                     if (expression[i] == ')')
                     {
@@ -130,36 +128,30 @@ namespace Engineering_Calculator
             //0 is inserted to insure proper emptyCalculation of sequence
             if (expression[0] == '-') expression = "0" + expression;                                                                
   
-            expression = Calculate(sequences["arc-trigonometry"], expression, 4);                                                                                                                    
-            expression = Calculate(sequences["trigonometry"], expression, 3);                                 
-            expression = Calculate(sequences["neg-arg-and-power"], expression, 2);               
-            expression = Calculate(sequences["pos-arg-neg-power"], expression, 1);   
-            expression = Calculate(sequences["pos-arg-pos-power"], expression, 0);                           
-            expression = Calculate(sequences["mul-div-neg-arg"], expression, 1);   
-            expression = Calculate(sequences["mul-div-pos-arg"], expression, 0);
-
-            //sequences of type (3++3--2+-3...) may be just replaced with one sign
-            expression = expression.Replace("++", "+");                                                                             
-            expression = expression.Replace("--", "+");                                                                           
-            expression = expression.Replace("+-", "-");                                                                            
-            expression = expression.Replace("-+", "-");
+            expression = Calculate(sequencePatterns["arc-trigonometry"], expression, 4);                                                                                                                    
+            expression = Calculate(sequencePatterns["trigonometry"], expression, 3);                                 
+            expression = Calculate(sequencePatterns["neg-arg-and-power"], expression, 2);               
+            expression = Calculate(sequencePatterns["pos-arg-neg-power"], expression, 1);   
+            expression = Calculate(sequencePatterns["pos-arg-pos-power"], expression, 0);                           
+            expression = Calculate(sequencePatterns["mul-div-neg-arg"], expression, 1);   
+            expression = Calculate(sequencePatterns["mul-div-pos-arg"], expression, 0);
+            expression = SimplifyAdditionSubtractionSigns(expression);
 
             if (expression[0] == '-') expression = "0" + expression;
-            expression = Calculate(sequences["add-sub"], expression, 0);
+            expression = Calculate(sequencePatterns["add-sub"], expression, 0);
 
-            if (Regex.IsMatch(expression, sequences["sci-number"]))
+            if (Regex.IsMatch(expression, sequencePatterns["sci-number"]))
                 result = Double.Parse(expression, CultureInfo.InvariantCulture);
             else
             {
                 currentRecursiveCalls++;
                 result = Calculate(expression);
             }
-
             return result;
         }
 
         //opens corresponding bracket pair in expression calculating inner expression,
-        //considering power operation after to avoid broken sequences
+        //considering power operation after to avoid broken sequencePatterns
         private string Calculate(string expression, List<int> openedBracketsIndexes, int i, bool isPower)
         {
             
@@ -173,7 +165,7 @@ namespace Engineering_Calculator
             {
                 subexpBrackets = new Regex(Regex.Escape(subexpressionWithBrackets)); //Escaping a minimal set of characters                                                                                                                        
                 subresult = Calculate(subexpression);                                //is made for cases like (-2)^(-2),                                                  
-                if (subresult < 0)                                                   //to avoid sequences like 2-^2-. (*)
+                if (subresult < 0)                                                   //to avoid sequencePatterns like 2-^2-. (*)
                 {                                                                    //replacing first match of escaped
                     replacement = Convert.ToString(-1 * subresult) + '-';            //subexpressionWithBrackets
                     expression = subexpBrackets.Replace(expression, replacement, 1); //in expression changing '-' position 
@@ -193,14 +185,17 @@ namespace Engineering_Calculator
             return expression;
         }
 
-        //finds sequences in expression string by specified pattern argument
+        //finds sequencePatterns in expression string invoking their calculation
         private string Calculate(string sequenceStr, string expression, int operationType)
         {
-            exCheck(expression); //to check if wrong opperands appeared in expression during calculation
+            //check if wrong opperands appeared in expression during calculation ect
+            CalculationValidator.CalculationCheck(expression, input, 
+                        sequencePatterns["one-sign-opr"], ref currentRecursiveCalls);
             Regex sequence = new Regex(sequenceStr);
             MatchCollection sequences = sequence.Matches(expression);
             foreach (Match s in sequences)
                 expression = expression.Replace(s.Value, Calculate(s, operationType));
+
             sequences = sequence.Matches(expression);
             if (sequences.Count > 0)
             {   
@@ -212,9 +207,9 @@ namespace Engineering_Calculator
         }
 
         //calculates sequenses of same priority replacing them with fractional number represented in a string
-        static string Calculate(Match sequence, int operationType)
+        private static string Calculate(Match sequence, int operationType)
         {
-            Regex number = new Regex(sequences["pos-number"]); //regex for any double number without sign
+            Regex number = new Regex(sequencePatterns["pos-number"]); 
             MatchCollection numbers, operations;
             double result;
             string resultS;
@@ -222,21 +217,21 @@ namespace Engineering_Calculator
             switch (operationType)
             {
                 case 0:
-                    operation = new Regex(sequences["one-sign-opr"]);
+                    operation = new Regex(sequencePatterns["one-sign-opr"]);
                     break;
                 case 1:
-                    operation = new Regex(sequences["two-sign-opr"]);
+                    operation = new Regex(sequencePatterns["two-sign-opr"]);
                     break;
                 case 2:
-                    operation = new Regex(sequences["three-sign-opr"]);
+                    operation = new Regex(sequencePatterns["three-sign-opr"]);
                     break;
                 case 3:
-                    operation = new Regex(sequences["math-opr"]);
-                    number = new Regex(sequences["number"]); //argument of function may be negative 
-                    break;                                   //(like sin-3 or sqrt-4 sequences)
+                    operation = new Regex(sequencePatterns["math-opr"]);
+                    number = new Regex(sequencePatterns["number"]); //argument of function may be negative 
+                    break;                                          //(like sin-3 or sqrt-4 sequences)
                 case 4:
-                    operation = new Regex(sequences["arc-trigonometry-opr"]);
-                    number = new Regex(sequences["number"]);
+                    operation = new Regex(sequencePatterns["arc-trigonometry-opr"]);
+                    number = new Regex(sequencePatterns["number"]);
                     break;
                 default:
                     throw new ArgumentException();
@@ -265,7 +260,7 @@ namespace Engineering_Calculator
         }
 
         //performs mathematical operation between two operands (x,y)
-        static double Calculate(double x, double y, string operation)
+        private static double Calculate(double x, double y, string operation)
         {
             switch (operation)
             {
@@ -295,7 +290,7 @@ namespace Engineering_Calculator
         }
 
         //performs text-type operation on operand (x)
-        static double Calculate(double x, string operation)
+        private static double Calculate(double x, string operation)
         {
             switch (operation)
             {
@@ -323,37 +318,37 @@ namespace Engineering_Calculator
             }
         }
 
-        //checks an expression string on validity (called during callculation)
-        //and amount of recursive calls, throws propper exeptions
-        public void exCheck(string expression)
+        //replaces sequencePatterns of type(3+-+3---2+-3...) with one operation sign
+        private static string SimplifyAdditionSubtractionSigns(string expression)
         {
-            Exception e;
-            Regex opr = new Regex(sequences["one-sign-opr"]);
-            MatchCollection oprs = opr.Matches(expression);
-            bool alotOfSci = ExpressionValidator.countChar(expression, 'E') > 1,
-                 sciOperation = ExpressionValidator.countChar(expression, 'E') == 1 && oprs.Count > 1;
+            string result = "";
+            for (int i = 0; i < expression.Length; i++)
+            {
+                char c = expression[i];
 
-            if (currentRecursiveCalls == MAX_RECURSIVE_CALLS)
-            {
-                currentRecursiveCalls = 0;
-                e = ErrorFactory.CreateCalculationException("Failed calculating expression", "StackOverflowException", expression, input);
-                throw e;
+                if (c == '+' || c == '-')
+                {
+                    int minusCount = 0;
+                    // Process consecutive + and -
+                    int j = i;
+                    for (; j < expression.Length; j++)
+                    {
+                        if (expression[j] == '-')
+                            minusCount++;
+                        else if (expression[j] != '+')
+                            break;  //end of sign sequence
+                    }
+                    //decide which sign to add
+                    if (minusCount % 2 == 0)
+                        result += "+";
+                    else
+                        result += "-";
+                    i = j - 1; //move outer loop index to end of processed sequence
+                }
+                else
+                    result += c;
             }
-            else if (expression.Contains("NaN"))
-            {
-                e = ErrorFactory.CreateCalculationException("NaN value", "ArithmeticException", expression, input);
-                throw e;
-            }
-            else if (expression.Contains("Infinity"))
-            {
-                e = ErrorFactory.CreateCalculationException("Infinity", "ArithmeticException", expression, input);
-                throw e;
-            }
-            else if (alotOfSci || sciOperation)
-            {
-                e = ErrorFactory.CreateCalculationException("Wrong operands format", "ArithmeticException", expression, input);
-                throw e;
-            }
+            return result;
         }
     }
 }

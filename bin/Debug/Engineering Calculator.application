@@ -7,14 +7,14 @@
     <framework targetVersion="4.8" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="Engineering Calculator.exe.manifest" size="3540">
+    <dependentAssembly dependencyType="install" codebase="Engineering Calculator.exe.manifest" size="3541">
       <assemblyIdentity name="Engineering Calculator.exe" version="1.0.0.1" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>wIXRXFOBRv0QYOj+t4VaJf03RLxQzl/knFVgWLeBU8o=</dsig:DigestValue>
+        <dsig:DigestValue>H61yr6mmhoL+h5bZOW2P5jhl0cIanIsfgSid1I8K6jY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

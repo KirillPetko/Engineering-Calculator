@@ -23,10 +23,7 @@ namespace Engineering_Calculator
             lastAnswer = "0";
             IsLocked = false;
             textField = _textFiled;
-
             exHandler = _exHandler;
-            exHandler.AddObserver(new ErrorLogger());
-            exHandler.AddObserver(new UserNotification(textField));
             g = _g;
         }
 
@@ -38,14 +35,17 @@ namespace Engineering_Calculator
         private readonly ExceptionHandler exHandler;
         private Calculation product;
         public event Action HistoryRequested;
+        public event Action DefaultThemeRequested;
+        public event Action DarkThemeRequested;
 
         public bool IsLocked { get => isLocked; set => isLocked = value; }
         public ExceptionHandler ExHandler => exHandler;
-        internal Calculation Product { get => product; set => product = value; }
-        
+        public Calculation Product { get => product; set => product = value; }
+        public CustomTextField TextField { get => textField; set => textField = value; }
+
         //methods
 
-        //adds string to inputCaption
+        //adds string to caption
         public void AddToCaption(string addition)
         {
             if (textField != null)
@@ -55,7 +55,7 @@ namespace Engineering_Calculator
             }
         }
 
-        //subtracts one symbol from textField's inputCaption
+        //subtracts one symbol from textField's caption
         public void SubtractFromCaption()
         {
             if (textField.Caption != String.Empty)
@@ -65,7 +65,7 @@ namespace Engineering_Calculator
             }
         }
 
-        //changes inputCaption of text field depending on result of Calculate() 
+        //changes caption of text field depending on result of Calculate() 
         //function (result string or exeption errorMsg), lockes if catches 
         //exeption or invalid expression errorMsg, displaying related errorMsg 
         public void CalculateCaption()
@@ -86,13 +86,13 @@ namespace Engineering_Calculator
             catch (Exception ex)
             {
                 ExHandler.HandleException(ex);
-                IsLocked = true;
                 textField.UpperCaption = String.Empty;
+                IsLocked = true;
             }
             textField.Draw(g);
         }
 
-        //clears inputCaption of textField, and unlocks itself (UserInputHandler() instance)
+        //clears caption of textField, and unlocks itself (UserInputHandler() instance)
         public void ClearCaption()
         {
             textField.Caption = String.Empty;
@@ -295,12 +295,30 @@ namespace Engineering_Calculator
                     FileManager.OpenFile(textField.Caption);
                     ClearCaption();
                     return true;
+                case "-removehistory":
+                    FileManager.DeleteFile("history.txt");
+                    ClearCaption();
+                    return true;
+                case "-removelog":
+                    FileManager.DeleteFile("log.txt");
+                    ClearCaption();
+                    return true;
+                case "-dark":
+                    DarkThemeRequested.Invoke();
+                    ClearCaption();
+                    return true;
+                case "-default":
+                    DefaultThemeRequested.Invoke();
+                    ClearCaption();
+                    return true;
                 default:
                     return false;
             }
         }
         public bool IsValidProduct()
-        {
+        {   
+            if (product == null)
+                return false;
             if (product.Input!=Convert.ToString(product.Result) && product.IsValidExpression)
                 return true;
             return false;

@@ -43,14 +43,38 @@ namespace Engineering_Calculator
                 default:
                     break;
             }
-            string path = fileName;
-            if (System.IO.File.Exists(path))
-                Process.Start(path);
+            if (File.Exists(fileName))
+                Process.Start(fileName);
             else
             {
                 Exception e = ErrorFactory.CreateFileException(errorMsg, command, fileName);
                 throw e;
             }
         }
+        public static void DeleteFile(string path)
+        {
+            string errorMsg = String.Empty, command = String.Empty;
+            switch (path)
+            {
+                case "history.txt":
+                    errorMsg = "Absent history";
+                    command = "-removehistory";
+                    break;
+                case "log.txt":
+                    errorMsg = "Absent log";
+                    command = "-removelog";
+                    break;
+                default:
+                    break;
+            }
+            if (File.Exists(path))
+                File.Delete(path);
+            else
+            {
+                Exception e = ErrorFactory.CreateFileException(errorMsg, command, path);
+                throw e;
+            }
+        }
+
     }
 }
