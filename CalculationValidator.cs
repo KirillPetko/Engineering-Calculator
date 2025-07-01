@@ -14,7 +14,8 @@ namespace Engineering_Calculator
         private const int MAX_RECURSIVE_CALLS = 250;
 
         //parses an expression string in order to check its validity,
-        //by comparing next symbol type with previous token type
+        //by comparing next symbol entity with previous token entity
+        //entities have value and type of value as fields
         public static bool VerifyInput(string expression, string _posNumSequence, string _textOpr)
         {
             if (String.IsNullOrEmpty(expression)) return false;
@@ -25,92 +26,157 @@ namespace Engineering_Calculator
             int openedBrackets = 0;
             int closedBrackets = 0;
 
-            string token = String.Empty;
-            TokenType tokenType = TokenType.None;
+            TokenEntity tokenEntity = new TokenEntity(String.Empty, TokenType.None);
 
             for (int i = 0; i < expression.Length; i++)
             {
-                char c = expression[i];
-                CharType charType = GetCharType(c);
-                if (charType == CharType.Invalid)
+                CharEntity charEntity = new CharEntity(expression[i], GetCharType(expression[i]));
+                if (charEntity.type == CharType.Invalid)
                     return false;
-                if (charType == CharType.OpenParen) openedBrackets++;
-                if (charType == CharType.CloseParen) closedBrackets++;
-                if (tokenType == TokenType.None) //token type is not assigned (yet)
+                if (charEntity.type == CharType.OpenParen) openedBrackets++;
+                if (charEntity.type == CharType.CloseParen) closedBrackets++;
+
+                if (tokenEntity.type == TokenType.None) //not yet assigned
                 {
-                    if (charType == CharType.Digit) tokenType = TokenType.Number;
-                    else if (charType == CharType.Sign && c == '-') tokenType = TokenType.Sign; //first sign is only minus
-                    else if (charType == CharType.Letter) tokenType = TokenType.TextOperation;
-                    else if (charType == CharType.OpenParen) tokenType = TokenType.OpenParen;
+                    if (charEntity.type == CharType.Digit) tokenEntity.type = TokenType.Number;
+                    else if (charEntity.type == CharType.Sign && charEntity.c == '-') tokenEntity.type = TokenType.Sign; //first sign is only minus
+                    else if (charEntity.type == CharType.Letter) tokenEntity.type = TokenType.TextOperation;
+                    else if (charEntity.type == CharType.OpenParen) tokenEntity.type = TokenType.OpenParen;
                     else return false;
 
-                    token += c;
+                    tokenEntity.token += charEntity.c;
                     if (i == expression.Length - 1)
-                        return IsValidFinalToken(token, tokenType, numberRegex, textOpRegex);
+                        return IsValidFinalToken(tokenEntity, numberRegex, textOpRegex);
                     continue;
                 }
 
-                switch (tokenType, charType)
-                {
-                    case (TokenType.Number, CharType.Digit):
-                        token += c;
-                        break;
-                    case (TokenType.Number, CharType.Sign):                  
-                        if (!IsValidNumber(token, numberRegex)) return false; //met operation - check token
-                        tokenType = TokenType.Sign;                           //change token type to new one
-                        token = c.ToString();                                 //reinitialize token
-                        break;                                               //same algorithm for most valid cases
-                    case (TokenType.Number, CharType.CloseParen):
-                        if (!IsValidNumber(token, numberRegex)) return false;
-                        tokenType = TokenType.CloseParen;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.Sign, CharType.Digit):
-                        tokenType = TokenType.Number;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.Sign, CharType.Letter):
-                        tokenType = TokenType.TextOperation;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.Sign, CharType.OpenParen):
-                        tokenType = TokenType.OpenParen;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.TextOperation, CharType.Letter):
-                        if (textOpRegex.IsMatch(token)) return false;
-                        token += c;
-                        break;
-                    case (TokenType.TextOperation, CharType.OpenParen):
-                        if (!textOpRegex.IsMatch(token)) return false;
-                        tokenType = TokenType.OpenParen;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.OpenParen, CharType.Digit):
-                        tokenType = TokenType.Number;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.OpenParen, CharType.Sign):
-                        if (c != '-') return false;
-                        tokenType = TokenType.Sign;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.OpenParen, CharType.OpenParen):
-                        break;
-                    case (TokenType.CloseParen, CharType.Sign):
-                        tokenType = TokenType.Sign;
-                        token = c.ToString();
-                        break;
-                    case (TokenType.CloseParen, CharType.CloseParen):
-                        break;
-                    default:
-                        return false;
-                }
+                tokenEntity = ValidationTokenCharSequence(tokenEntity, charEntity, numberRegex, textOpRegex);
+                if (!tokenEntity.isValidNextChar)
+                    return false;   
             }
-            if (!IsValidFinalToken(token, tokenType, numberRegex, textOpRegex))
+            if (!IsValidFinalToken(tokenEntity, numberRegex, textOpRegex))
                 return false;
 
             return openedBrackets == closedBrackets;
+        }
+
+        //compares assigned entities of token and next char
+        private static TokenEntity ValidationTokenCharSequence(TokenEntity tokenEntity, CharEntity charEntity, Regex numberRegex, Regex textOpRegex)
+        {
+            switch (tokenEntity.type, charEntity.type)
+            {
+                case (TokenType.Number, CharType.Digit):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, false);
+                    break;
+                case (TokenType.Number, CharType.Sign):
+                    if (!IsValidNumber(tokenEntity.token, numberRegex))       //met operation - check token   
+                    {
+                        tokenEntity.isValidNextChar = false;
+                        break;
+                    }
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);                                                                              
+                    break;                                                    
+                case (TokenType.Number, CharType.CloseParen):
+                    if (!IsValidNumber(tokenEntity.token, numberRegex))
+                    {
+                        tokenEntity.isValidNextChar = false;
+                        break;
+                    }
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.Sign, CharType.Digit):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.Sign, CharType.Letter):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.Sign, CharType.OpenParen):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true); ;
+                    break;
+                case (TokenType.TextOperation, CharType.Letter):
+                    if (textOpRegex.IsMatch(tokenEntity.token))
+                    {
+                        tokenEntity.isValidNextChar = false;
+                        break;
+                    }
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, false); 
+                    break;
+                case (TokenType.TextOperation, CharType.OpenParen):
+                    if (!textOpRegex.IsMatch(tokenEntity.token))
+                    {
+                        tokenEntity.isValidNextChar = false;
+                        break;
+                    }
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.OpenParen, CharType.Digit):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.OpenParen, CharType.Sign):
+                    if (charEntity.c != '-')
+                    {
+                        tokenEntity.isValidNextChar = false;
+                        break;
+                    }
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.OpenParen, CharType.OpenParen):
+                    tokenEntity.isValidNextChar = true;
+                    break;
+                case (TokenType.CloseParen, CharType.Sign):
+                    tokenEntity = ModifyTokenEntity(tokenEntity, charEntity, true);
+                    break;
+                case (TokenType.CloseParen, CharType.CloseParen):
+                    tokenEntity.isValidNextChar = true;
+                    break;
+                default:
+                    break;
+            }
+            return tokenEntity;
+        }
+
+        private static TokenEntity ModifyTokenEntity(TokenEntity tokenEntity, CharEntity charEntity, bool needReset)
+        {
+            if (needReset) // reinitiallize tokenEntity with new type and value
+            {
+                switch (charEntity.type)
+                {
+                    case CharType.Digit:
+                        tokenEntity.type = TokenType.Number;
+                        break;
+                    case CharType.Sign:
+                        tokenEntity.type = TokenType.Sign;
+                        break;
+                    case CharType.Letter:
+                        tokenEntity.type = TokenType.TextOperation;
+                        break;
+                    case CharType.OpenParen:
+                        tokenEntity.type = TokenType.OpenParen;
+                        break;
+                    case CharType.CloseParen:
+                        tokenEntity.type = TokenType.CloseParen;
+                        break;
+                }
+                tokenEntity.token = charEntity.c.ToString();
+                tokenEntity.isValidNextChar = true;
+            }
+            else  // add char to tokenEntity.token
+            {
+                tokenEntity.token += charEntity.c;
+                tokenEntity.isValidNextChar = true;
+            }
+            return tokenEntity;
+        }
+
+        private static bool IsValidFinalToken(TokenEntity tokenEntity, Regex numberRegex, Regex textOpRegex)
+        {
+            switch (tokenEntity.type)  
+            {
+                case TokenType.Number:
+                    return IsValidNumber(tokenEntity.token, numberRegex);
+                case TokenType.CloseParen: return true;
+                default: return false;
+            }
         }
 
         private static CharType GetCharType(char c)
@@ -129,24 +195,38 @@ namespace Engineering_Calculator
             return numberRegex.IsMatch(token) && token.Count(ch => ch == '.') <= 1 && token[0] != '.';
         }
 
-        private static bool IsValidFinalToken(string lastToken, TokenType type, Regex numberRegex, Regex textOpRegex)
+        private struct TokenEntity
         {
-            switch (type)  
-            {
-                case TokenType.Number:
-                    return IsValidNumber(lastToken, numberRegex);
-                case TokenType.CloseParen: return true;
-                default: return false;
+            public string token;
+            public TokenType type;
+            public bool isValidNextChar;
+            public TokenEntity(string _token, TokenType _type)
+            { 
+                token = _token;
+                type = _type;
+                isValidNextChar = false;
             }
         }
+        private struct CharEntity
+        { 
+            public char c;
+            public CharType type;
+            public CharEntity(char _c, CharType _type)
+            { 
+                c = _c;
+                type = _type;
+            }
+        }
+
         private enum TokenType
         {
-            None, Number, Sign, TextOperation, OpenParen, CloseParen 
+            None, Number, Sign, TextOperation, OpenParen, CloseParen
         }
         private enum CharType
         {
             Invalid, Digit, Sign, Letter, OpenParen, CloseParen
         }
+
 
         //checks an expression string on validity (called during callculation)
         //and amount of recursive calls, forms and throws propper exceptions

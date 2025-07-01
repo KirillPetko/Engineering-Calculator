@@ -128,3 +128,34 @@
 30.06.2025 22:41:18	Wrong operands format	2^50+2^50					>>>>>		1.12589990684262E+15+1.12589990684262E+15
 30.06.2025 22:41:24	Wrong operands format	2^50+1						>>>>>		1.12589990684262E+15+1
 30.06.2025 22:49:32	Invalid input		1.2.3						>>>>>		1.2.3
+01.07.2025 21:56:03	Invalid input		asdasd						>>>>>		asdasd
+01.07.2025 21:56:09	Invalid input		2^^						>>>>>		2^^
+01.07.2025 21:56:17	Invalid input		+3						>>>>>		+3
+01.07.2025 21:56:25	Invalid input		2+()						>>>>>		2+()
+01.07.2025 21:57:07	Invalid input		2sin2						>>>>>		2sin2
+01.07.2025 21:57:13	Invalid input		sin+						>>>>>		sin+
+01.07.2025 21:57:20	Input string was not in a correct format.	System.FormatException
+01.07.2025 22:00:24	Invalid input		sina(2)						>>>>>		sina(2)
+01.07.2025 22:00:30	Invalid input		sin(2)						>>>>>		sin(2)
+01.07.2025 22:00:36	Invalid input		sin(2)						>>>>>		sin(2)
+01.07.2025 22:06:21	Invalid input		sina(2)						>>>>>		sina(2)
+01.07.2025 22:06:49	Invalid input		2+(+2)						>>>>>		2+(+2)
+01.07.2025 22:07:14	Invalid input		cosa(2)						>>>>>		cosa(2)
+01.07.2025 22:07:40	Invalid input		1..2+2						>>>>>		1..2+2
+01.07.2025 22:07:49	Invalid input		2+1.1.2+2					>>>>>		2+1.1.2+2
+01.07.2025 22:17:49	Invalid input		cos						>>>>>		cos
+01.07.2025 22:17:56	Invalid input		1+2^s						>>>>>		1+2^s
+01.07.2025 22:18:27	Invalid input		2+(						>>>>>		2+(
+01.07.2025 22:22:29	Invalid input		2+((3)))					>>>>>		2+((3)))
+01.07.2025 22:22:35	Invalid input		2+(((3))					>>>>>		2+(((3))
+01.07.2025 22:51:44	Invalid input		2+						>>>>>		2+
+01.07.2025 22:51:55	Invalid input		2+(2						>>>>>		2+(2
+01.07.2025 22:52:09	Invalid input		2+(2))						>>>>>		2+(2))
+01.07.2025 22:52:22	Invalid input		cos(+2)						>>>>>		cos(+2)
+01.07.2025 22:52:28	Invalid input		(/2)						>>>>>		(/2)
+01.07.2025 22:52:36	Invalid input		cosa(2)						>>>>>		cosa(2)
+01.07.2025 22:55:28	Invalid input		2+						>>>>>		2+
+01.07.2025 22:55:47	Invalid input		2+34.2.						>>>>>		2+34.2.
+01.07.2025 22:55:53	Invalid input		2+34..1						>>>>>		2+34..1
+01.07.2025 22:56:10	Invalid input		2+(2.2.2)					>>>>>		2+(2.2.2)
+01.07.2025 22:56:19	Invalid input		2+.2						>>>>>		2+.2
