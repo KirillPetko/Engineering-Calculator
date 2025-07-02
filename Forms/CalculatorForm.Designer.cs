@@ -1,4 +1,5 @@
-﻿namespace Engineering_Calculator
+﻿
+namespace Engineering_Calculator
 {
     partial class CalculatorForm
     {
