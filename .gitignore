@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# History and log files
+bin/Debug/history.txt
+bin/Debug/log.txt

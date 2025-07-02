@@ -7,69 +7,31 @@ using System.Threading.Tasks;
 
 namespace Engineering_Calculator
 {
-   //class responsible for visual representation of a custom button
-    internal class CustomButton:FormElement
+   //class responsible for an abstract representation of a button
+    public abstract class CustomButton:FormElement
     {
         public CustomButton()
         {
-            X = 0;
-            Y = 0;
-            Width = 0;
-            Height = 0;
-            Caption = string.Empty;
         }
-        public CustomButton(int _x, int _y, int _width, int _height, string _caption) 
-        { 
+        public CustomButton(int _x, int _y, string _caption) 
+        {
             X = _x;
             Y = _y;
-            Width = _width;
-            Height = _height;
+            Width = 75;
+            Height = 75;
             Caption = _caption;
-
-            if (caption == "C" || caption == "<-")
-                brush = new SolidBrush(Color.Red);
-            else
-                brush = new SolidBrush(Color.Black);
-            fnt = new System.Drawing.Font("Consolas", (float)17);
-            pen = new Pen(Color.Black, 1);
-            border = new Rectangle(x, y, width, height);
         }
 
-        private int x;
-        private int y;
-        private int width;
-        private int height;
-        private string caption;
+        public override int X { get; set; }
+        public override int Y { get; set; }
+        public override int Width { get; set; }
+        public override int Height { get; set; }
+        public override string Caption { get; set; }
 
-        Rectangle border;
-        Brush brush;
-        Font fnt;
-        Pen pen;
-
-        public override int X { get => x; set => x = value; }
-        public override int Y { get => y; set => y = value; }
-        public override int Width { get => width; set => width = value; }
-        public override int Height { get => height; set => height = value; }
-        public override string Caption { get => caption; set => caption = value; }
         public override string GetTypeString()
         {
             return "CustomButton";
         }
-
-        public override void Draw(Graphics g)
-        {
-            g.DrawRectangle(pen, border);
-
-            //centring inputCaption in button rectangle by inputCaption length
-            if (caption.Length == 1) 
-                g.DrawString(caption, fnt, brush, x + 27, y+25);
-            else if (caption.Length == 2)
-                g.DrawString(caption, fnt, brush, x + 22, y + 25);
-            else if(caption.Length == 3)
-                g.DrawString(caption, fnt, brush, x + 15, y + 25);
-            else if(caption.Length == 4)
-                g.DrawString(caption, fnt, brush, x + 8, y + 25);
-
-        }
+        public abstract override void Draw(Graphics g);
     }
 }

@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-using System.Text.RegularExpressions;
 
 namespace Engineering_Calculator
 {
-    //class responsible for graphical representation of a custom text field
-    public abstract class CustomTextField:FormElement
+    public abstract class CustomHistoryButton : FormElement
     {
-        public CustomTextField() 
+        public CustomHistoryButton()
         {
-            X = 50;
-            Y = 30;
-            Width = 675; 
-            Height = 80;
-            Caption = String.Empty;
-            UpperCaption = String.Empty;    
+            X = 697;
+            Y = 33;
+            Width = 25;
+            Height = 25;
+            Caption = "HistoryButton";
         }
 
         public override int X { get; set; }
@@ -28,12 +24,9 @@ namespace Engineering_Calculator
         public override int Width { get; set; }
         public override int Height { get; set; }
         public override string Caption { get; set; }
-        public string UpperCaption { get; set; }
-        public FormElement HButtonToDraw { get; set; }
-
         public override string GetTypeString()
         {
-            return "CustomTextField";
+            return Caption;
         }
         public abstract override void Draw(Graphics g);
     }

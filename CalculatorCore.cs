@@ -12,28 +12,37 @@ namespace Engineering_Calculator
     //also implements initialization
     internal class CalculatorCore
     {
-        public CalculatorCore(int _width, int _height) 
+        public CalculatorCore(int _width, int _height, Graphics _g, IFormElementFactory _factory) 
         {
             //supposed to be Form's w and h
             width = _width; 
             height = _height;
             Buffer = new Bitmap(width, height);
+            g = _g;
 
-            Containers = new ContainerManager();
+            Factory = _factory;
+            Containers = new ContainerManager(Factory);
             UpdateBitmap();
 
-            errFactory = new ErrorFactory();
             exHandler = new ExceptionHandler();
-            HandlerUI = new UserInputHandler(Containers.GetCustomTextField(), ErrFactory, exHandler);
+            errLogger = new ErrorLogger();
+            usrNotification = new UserNotification(Containers.GetCustomTextField());
+            exHandler.AddObserver(errLogger);
+            exHandler.AddObserver(usrNotification);
+
+            HandlerUI = new UserInputHandler(Containers.GetCustomTextField(), exHandler, g);
         }
 
         //fields
+        Graphics g;
         private UserInputHandler handlerUI;
         private ContainerManager сontainers;
         private Bitmap buffer; //implemented for faster drawing
-
-        private readonly ErrorFactory errFactory;
         private readonly ExceptionHandler exHandler;
+        private ErrorLogger errLogger;
+        private UserNotification usrNotification;
+        private IFormElementFactory factory;
+        
 
         private int width; 
         private int height;
@@ -41,9 +50,9 @@ namespace Engineering_Calculator
         //internal Calculation Calc { get => emptyCalculation; set => emptyCalculation = value; }
         internal UserInputHandler HandlerUI { get => handlerUI; set => handlerUI = value; }
         public Bitmap Buffer { get => buffer; set => buffer = value; }
-        public ErrorFactory ErrFactory { get => errFactory; }
         public ExceptionHandler ExHandler => exHandler;
         internal ContainerManager Containers { get => сontainers; set => сontainers = value; }
+        public IFormElementFactory Factory { get => factory; set => factory = value; }
 
         public void UpdateBitmap()
         {
@@ -56,39 +65,37 @@ namespace Engineering_Calculator
                 //increasing smoothnes of writen text
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                //foreach (FormElement element in Containers.ElementsUI)
-                //    element.Draw(graphics);
-                for (int i = 0;i< Containers.ElementsUI.Length;i++)
-                    Containers.ElementsUI[i].Draw(graphics);
+                foreach (FormElement element in Containers.ElementsUI)
+                    element.Draw(graphics);
             }
         }
         //passes key data to UserInputHandler() instance
         //to handle KeyDown() event. Also unlocks
         //UserInputHandler(), if customTextField is cleared
-        public void InvokeKeyHandler(KeyEventArgs e, Graphics g)
+        public void InvokeKeyHandler(KeyEventArgs e)
         {
             if (!HandlerUI.IsLocked)
             {
-                HandlerUI.HandleKeyDown(g, e);
-                if (e.KeyCode == Keys.Enter)
+                HandlerUI.HandleKeyDown(e);
+                if (e.KeyCode == Keys.Enter && HandlerUI.IsValidProduct())
                 { 
                     Containers.Calculations.Add(HandlerUI.Product);
                     Containers.SaveLastCalculationToTextFile();
+                    handlerUI.Product = null;
                 }   
             }
             if (HandlerUI.IsLocked && e.KeyCode == Keys.Delete)
             {
-                HandlerUI.ClearCaption(g);
+                HandlerUI.ClearCaption();
                 HandlerUI.IsLocked = false;
             }
-
             UpdateBitmap();
         }
 
         //checks click location, defines clicked element, by 
         //calling FormElement:CheckPoint() method. Also unlocks
         //UserInputHandler() instance, if customTextField is cleared
-        public void InvokeClickHandler(MouseEventArgs e, Graphics g)
+        public void InvokeClickHandler(MouseEventArgs e)
         {
             bool isClicked = false;
             string buttonCaption = String.Empty;
@@ -100,17 +107,33 @@ namespace Engineering_Calculator
                     buttonCaption = btn.Caption;
                     if (isClicked && !HandlerUI.IsLocked)
                     { 
-                        HandlerUI.HandleButtonClick(g, btn);
-                        if (buttonCaption == "=" && HandlerUI.Product != null) 
+                        HandlerUI.HandleButtonClick(btn);
+                        if (buttonCaption == "=" && HandlerUI.IsValidProduct())
+                        { 
                             Containers.Calculations.Add(HandlerUI.Product);
+                            Containers.SaveLastCalculationToTextFile();
+                            HandlerUI.Product = null;
+                        }    
                     }  
                     if (isClicked && buttonCaption == "C" && HandlerUI.IsLocked) 
                     {
-                        HandlerUI.ClearCaption(g);
+                        HandlerUI.ClearCaption();
                         HandlerUI.IsLocked = false;
                     }  
                 }
             UpdateBitmap();
+        }
+
+        public void ChangeTheme(IFormElementFactory _factory)
+        { 
+            Containers.Factory = _factory;
+            Containers.FormElementsInit();
+
+            var textField = Containers.GetCustomTextField();
+            HandlerUI.ExHandler.RemoveObserver(usrNotification);
+            usrNotification = new UserNotification(textField);
+            HandlerUI.ExHandler.AddObserver(usrNotification);
+            HandlerUI.TextField = textField;  
         }
 
     }

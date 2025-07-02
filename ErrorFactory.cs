@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,13 +8,13 @@ using System.Threading.Tasks;
 namespace Engineering_Calculator
 {
     //responsible for forming custom exceptions containing specific data
-    public class ErrorFactory
+    internal static class ErrorFactory
     {
-        public ErrorFactory() { }
-        Exception e;
+        static ErrorFactory() { }
+        static Exception e;
 
         //supposed to be called during calculation process
-        public Exception CreateCalculationException(string _message, string _exceptionType, string _causingExpression, string _userInput)
+        public static Exception CreateCalculationException(string _message, string _exceptionType, string _causingExpression, string _userInput)
         {
             switch (_exceptionType)
             {
@@ -35,6 +36,13 @@ namespace Engineering_Calculator
             e.Data.Add("UserInput", _userInput);
             return e;
         }
-
+        public static Exception CreateFileException(string _message, string command, string fileName)
+        {
+            e = new FileNotFoundException(_message);
+            e.Data.Add("DateTimeInfo", DateTime.Now);
+            e.Data.Add("CausingExpression", fileName);
+            e.Data.Add("UserInput", command);
+            return e;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Engineering_Calculator
     internal class ContainerManager
     {
         //manages core-related containers FormElement[] and List<Calculation>
-        public ContainerManager()
+        public ContainerManager(IFormElementFactory _factory)
         {
             buttonCaptions = new[]
             {
@@ -19,20 +19,18 @@ namespace Engineering_Calculator
             "7","8","9","sqrt","ans","+","-","/","*",
             "0",".","(",")","C","<-","="
             };
-            FormElementsInit();
             calculations = new List<Calculation> { };
-            fM = new FileManager();
+            Factory = _factory;
+            FormElementsInit();
         }
         private FormElement[] elementsUI;
         private string[] buttonCaptions;
         private readonly List<Calculation> calculations;
-        private readonly FileManager fM;
+        private IFormElementFactory factory;
 
         internal FormElement[] ElementsUI { get => elementsUI; set => elementsUI = value; }
         internal List<Calculation> Calculations => calculations;
-
-        internal FileManager FM => fM;
-
+        public IFormElementFactory Factory { get => factory; set => factory = value; }
 
         //methods
 
@@ -40,18 +38,18 @@ namespace Engineering_Calculator
         public void FormElementsInit()
         {
             ElementsUI = new FormElement[36];
-            int bXPosition = 50, bYPosition = 150, bWidth = 75, bHeight = 75;
+            int bXPosition = 50, bYPosition = 150;
             int rowButtonCounter = 0;
 
             for (int i = 0; i < ElementsUI.Length; i++)
             {
                 if (i == 0)
-                    ElementsUI[i] = new CustomTextField();
-                else if(i==1)
-                    ElementsUI[i] = new HistoryButton();
+                    ElementsUI[i] = Factory.CreateTextField();
+                else if (i == 1)
+                    ElementsUI[i] = Factory.CreateHistoryButton();
                 else
                 {
-                    ElementsUI[i] = new CustomButton(bXPosition, bYPosition, bWidth, bHeight, buttonCaptions[i - 2]);
+                    ElementsUI[i] = Factory.CreateButton(bXPosition, bYPosition, buttonCaptions[i - 2]);
                     bXPosition += 75;
                     rowButtonCounter++;
                 }
@@ -60,26 +58,16 @@ namespace Engineering_Calculator
                     bYPosition += 75;
                     bXPosition = 50;
                     rowButtonCounter = 0;
-                }      
+                }
             }
             var textFiled = GetCustomTextField();
             textFiled.HButtonToDraw = ElementsUI[1];
         }
 
-        //returns user input field
         public CustomTextField GetCustomTextField()
         {
-            CustomTextField textField = null;
-            for (int i = 0; i < ElementsUI.Length; i++)
-                if (ElementsUI[i].GetTypeString() == "CustomTextField")
-                { 
-                    textField = ElementsUI[i] as CustomTextField;
-                    break;
-                }
-            if (textField == null) 
-                throw new ArgumentNullException("failed to initiallize FormElement:CustomTextField");
-
-            return textField;
+            FormElement textField = ElementsUI.First(elem => elem.GetTypeString() == "CustomTextField");
+            return textField as CustomTextField;
         }
 
         public void SaveLastCalculationToTextFile()
@@ -101,7 +89,7 @@ namespace Engineering_Calculator
                 }
             }
             if(!String.IsNullOrEmpty(expToSave))
-                fM.RecordCalculation(expToSave);
+                FileManager.RecordCalculation(expToSave);
         }
     }
 }

@@ -13,12 +13,14 @@ namespace Engineering_Calculator
         
         public UserNotification(CustomTextField _textField)
         {
-            textField = _textField;
+            TextField = _textField;
         }
-        CustomTextField textField;
+        private CustomTextField textField;
+        public CustomTextField TextField { get => textField; set => textField = value; }
+
         public void OnException(Exception e)
         { 
-            textField.Caption = e.Message;
+            TextField.Caption = e.Message;
         }
     }
 }

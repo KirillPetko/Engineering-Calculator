@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -15,39 +16,37 @@ namespace Engineering_Calculator
     //in form of redrawing or Calculation() instance 
     internal class UserInputHandler
     {
-        public UserInputHandler(CustomTextField _textFiled, ErrorFactory _errFactory, ExceptionHandler _exHandler)
+        public UserInputHandler(CustomTextField _textFiled, ExceptionHandler _exHandler, Graphics _g)
         {
             result = String.Empty;
             key = String.Empty;
             lastAnswer = "0";
             IsLocked = false;
             textField = _textFiled;
- 
-            errFactory = _errFactory;
             exHandler = _exHandler;
-            product = null;
-            exHandler.AddObserver(new ErrorLogger());
-            exHandler.AddObserver(new UserNotification(textField));
+            g = _g;
         }
 
         //fields
         private string result, key, lastAnswer;
         private bool isLocked;
+        private Graphics g;
         private CustomTextField textField;
-        private readonly ErrorFactory errFactory;
         private readonly ExceptionHandler exHandler;
         private Calculation product;
+        public event Action HistoryRequested;
+        public event Action DefaultThemeRequested;
+        public event Action DarkThemeRequested;
 
         public bool IsLocked { get => isLocked; set => isLocked = value; }
         public ExceptionHandler ExHandler => exHandler;
-
-        internal ErrorFactory ErrFactory { get => errFactory;}
-        internal Calculation Product { get => product; set => product = value; }
+        public Calculation Product { get => product; set => product = value; }
+        public CustomTextField TextField { get => textField; set => textField = value; }
 
         //methods
 
-        //adds string to inputCaption
-        public void AddToCaption(string addition, Graphics g)
+        //adds string to caption
+        public void AddToCaption(string addition)
         {
             if (textField != null)
             {
@@ -56,8 +55,8 @@ namespace Engineering_Calculator
             }
         }
 
-        //subtracts one symbol from textField's inputCaption
-        public void SubtractFromCaption(Graphics g)
+        //subtracts one symbol from textField's caption
+        public void SubtractFromCaption()
         {
             if (textField.Caption != String.Empty)
             {
@@ -66,57 +65,60 @@ namespace Engineering_Calculator
             }
         }
 
-        //changes inputCaption of text field depending on result of Calculate() 
-        //function (result string or exeption message), lockes if catches 
-        //exeption or invalid expression message, displaying related message 
-        public void CalculateCaption(Graphics g)
+        //changes caption of text field depending on result of Calculate() 
+        //function (result string or exeption errorMsg), lockes if catches 
+        //exeption or invalid expression errorMsg, displaying related errorMsg 
+        public void CalculateCaption()
         {
+            product = new Calculation();
             //in case of any non-implemented exeption display it in English
             System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
             try
             {
-                Product = new Calculation(textField.Caption, ErrFactory);
+                if(ExecuteCommand())
+                    return;
+                Product = new Calculation(textField.Caption);
                 result = Convert.ToString(Product.Result);
                 textField.Caption = result.Replace(",", ".");
                 lastAnswer = textField.Caption;
                 textField.UpperCaption = "ans = " + lastAnswer;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 ExHandler.HandleException(ex);
-                IsLocked = true;
                 textField.UpperCaption = String.Empty;
+                IsLocked = true;
             }
             textField.Draw(g);
         }
 
-        //clears inputCaption of textField, and unlocks itself (UserInputHandler() instance)
-        public void ClearCaption(Graphics g)
+        //clears caption of textField, and unlocks itself (UserInputHandler() instance)
+        public void ClearCaption()
         {
-                textField.Caption = String.Empty;
-                textField.UpperCaption = String.Empty;
-                textField.Draw(g);
+            textField.Caption = String.Empty;
+            textField.UpperCaption = String.Empty;
+            textField.Draw(g);
         }
 
         //handles input with pressed shift button (implementation in CalculatorCore.cs)
-        public void HandleShiftPressed(Graphics g, KeyEventArgs e)
+        public void HandleShiftPressed(KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.D6:
-                    AddToCaption("^", g);
+                    AddToCaption("^");
                     break;
                 case Keys.D8:
-                    AddToCaption("*", g);
+                    AddToCaption("*");
                     break;
                 case Keys.D9:
-                    AddToCaption("(", g);
+                    AddToCaption("(");
                     break;
                 case Keys.D0:
-                    AddToCaption(")", g);
+                    AddToCaption(")");
                     break;
                 case Keys.Oemplus:
-                    AddToCaption("+", g);
+                    AddToCaption("+");
                     break;
                 default:
                     break;
@@ -124,7 +126,7 @@ namespace Engineering_Calculator
         }
 
         //implements copy-paste function
-        public void HandleControlPressed(Graphics g, KeyEventArgs e) 
+        public void HandleControlPressed(KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
@@ -134,29 +136,29 @@ namespace Engineering_Calculator
                 case Keys.V:
                     string textToPaste = Clipboard.GetText();
                     textToPaste = Regex.Replace(textToPaste, @"\s+", String.Empty);
-                    AddToCaption(textToPaste, g);
+                    AddToCaption(textToPaste);
                     break;
-                default :
+                default:
                     break;
             }
         }
 
         //handles numpad operation keys pool
-        public void HandleNumpadOperations(Graphics g, KeyEventArgs e)
+        public void HandleNumpadOperations(KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.Add:
-                    AddToCaption("+", g);
+                    AddToCaption("+");
                     break;
                 case Keys.Subtract:
-                    AddToCaption("-", g);
+                    AddToCaption("-");
                     break;
                 case Keys.Multiply:
-                    AddToCaption("*", g);
+                    AddToCaption("*");
                     break;
                 case Keys.Divide:
-                    AddToCaption("/", g);
+                    AddToCaption("/");
                     break;
                 default:
                     break;
@@ -165,129 +167,161 @@ namespace Engineering_Calculator
 
         //handles most keys pressed down by calling  
         //corresponding functions with specific arguments
-        public void HandleMajorityKeys(Graphics g, KeyEventArgs e)
+        public void HandleMajorityKeys(KeyEventArgs e)
         {
             bool lettersKeyPool = e.KeyCode >= Keys.A && e.KeyCode <= Keys.Z,
                  numbersKeyPool = e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9,
                  numpadKeyPool = e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.NumPad9,
                  numpadOprKeyPool = e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract
                               || e.KeyCode == Keys.Multiply || e.KeyCode == Keys.Divide;
-            if (e.Control) 
-                HandleControlPressed(g, e);
+            if (e.Control)
+                HandleControlPressed(e);
             else if (e.Shift)
-                HandleShiftPressed(g, e);
+                HandleShiftPressed(e);
             else
             {
                 if (lettersKeyPool)
-                    AddToCaption(e.KeyCode.ToString().ToLower(), g);
+                    AddToCaption(e.KeyCode.ToString().ToLower());
                 if (numpadKeyPool)
-                    AddToCaption(e.KeyCode.ToString().Replace("NumPad", String.Empty), g);
+                    AddToCaption(e.KeyCode.ToString().Replace("NumPad", String.Empty));
                 if (numpadOprKeyPool)
-                    HandleNumpadOperations(g, e);
+                    HandleNumpadOperations(e);
                 if (numbersKeyPool)
                 {
                     key = e.KeyCode.ToString();
                     key = key.Trim('D');
-                    AddToCaption(key, g);
+                    AddToCaption(key);
                 }
                 if (e.KeyCode == Keys.OemMinus)
-                    AddToCaption("-", g);
+                    AddToCaption("-");
                 if (e.KeyCode == Keys.OemQuestion || e.KeyCode == Keys.Oem5)
-                    AddToCaption("/", g);
+                    AddToCaption("/");
                 if (e.KeyCode == Keys.OemPeriod)
-                    AddToCaption(".", g);
+                    AddToCaption(".");
                 if (e.KeyCode == Keys.Oemcomma)
-                    AddToCaption(".", g);
+                    AddToCaption(".");
                 if (e.KeyCode == Keys.Delete)
-                    ClearCaption(g);
+                    ClearCaption();
             }
         }
 
         //implements form click event by calling corresponding
         //handler functions with specific arguments
-        public void HandleButtonClick(Graphics g, FormElement button)
+        public void HandleButtonClick(FormElement button)
         {
             switch (button.Caption)
             {
                 case "C":
-                    ClearCaption(g);
+                    ClearCaption();
                     break;
                 case "<-":
-                    SubtractFromCaption(g);
+                    SubtractFromCaption();
                     break;
                 case "Pi":
-                    AddToCaption("3.141592", g);
+                    AddToCaption("3.141592");
                     break;
                 case "e":
-                    AddToCaption("2.71828", g);
+                    AddToCaption("2.71828");
                     break;
                 case "sin":
-                    AddToCaption("sin(", g);
+                    AddToCaption("sin(");
                     break;
                 case "cos":
-                    AddToCaption("cos(", g);
+                    AddToCaption("cos(");
                     break;
                 case "tan":
-                    AddToCaption("tan(", g);
+                    AddToCaption("tan(");
                     break;
                 case "asin":
-                    AddToCaption("asin(", g);
+                    AddToCaption("asin(");
                     break;
                 case "acos":
-                    AddToCaption("acos(", g);
+                    AddToCaption("acos(");
                     break;
                 case "atan":
-                    AddToCaption("atan(", g);
+                    AddToCaption("atan(");
                     break;
                 case "ln":
-                    AddToCaption("ln(", g);
+                    AddToCaption("ln(");
                     break;
                 case "log":
-                    AddToCaption("log(", g);
+                    AddToCaption("log(");
                     break;
                 case "sqrt":
-                    AddToCaption("sqrt(", g);
+                    AddToCaption("sqrt(");
                     break;
                 case "ans":
-                    AddToCaption(lastAnswer, g);
+                    AddToCaption(lastAnswer);
                     break;
                 case "=":
-                    product = new Calculation();
-                    CalculateCaption(g);
+                    CalculateCaption();
                     break;
                 case "HistoryButton":
-                    System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-                    try { System.Diagnostics.Process.Start("history.txt"); }
-                    catch (Exception ex)
-                    {
-                        ExHandler.HandleException(ex);
-                        IsLocked = true;
-                        textField.UpperCaption = String.Empty;
-                    }
+                    HistoryRequested.Invoke();
                     break;
                 default:
-                    AddToCaption(button.Caption, g);
+                    AddToCaption(button.Caption);
                     break;
             }
         }
 
         //implements expression keys pressed down event by calling  
         //corresponding handler functions with specific arguments
-        public void HandleKeyDown(Graphics g, KeyEventArgs e)
+        public void HandleKeyDown(KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
                 case Keys.Enter:
-                    CalculateCaption(g);
+                    CalculateCaption();
                     break;
                 case Keys.Back:
-                    SubtractFromCaption(g);
+                    SubtractFromCaption();
                     break;
                 default:
-                    HandleMajorityKeys(g, e);
+                    HandleMajorityKeys(e);
                     break;
             }
         }
 
+        public bool ExecuteCommand()
+        {
+            switch (textField.Caption)
+            {
+                case "-history":
+                    FileManager.OpenFile(textField.Caption);
+                    ClearCaption();
+                    return true;
+                case "-log":
+                    FileManager.OpenFile(textField.Caption);
+                    ClearCaption();
+                    return true;
+                case "-removehistory":
+                    FileManager.DeleteFile("history.txt");
+                    ClearCaption();
+                    return true;
+                case "-removelog":
+                    FileManager.DeleteFile("log.txt");
+                    ClearCaption();
+                    return true;
+                case "-dark":
+                    DarkThemeRequested.Invoke();
+                    ClearCaption();
+                    return true;
+                case "-default":
+                    DefaultThemeRequested.Invoke();
+                    ClearCaption();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public bool IsValidProduct()
+        {   
+            if (product == null)
+                return false;
+            if (product.Input!=Convert.ToString(product.Result) && product.IsValidExpression)
+                return true;
+            return false;
+        }
     }
 }
