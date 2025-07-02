@@ -76,45 +76,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calculation.cs" />
-    <Compile Include="CalculatorCore.cs" />
-    <Compile Include="CalculatorHistoryForm.cs">
+    <Compile Include="Controls\CustomButton.cs" />
+    <Compile Include="Controls\CustomHistoryButton.cs" />
+    <Compile Include="Controls\CustomTextField.cs" />
+    <Compile Include="Controls\DarkThemeButton.cs" />
+    <Compile Include="Controls\DarkThemeFactory.cs" />
+    <Compile Include="Controls\DarkThemeHistoryButton.cs" />
+    <Compile Include="Controls\DarkThemeTextField.cs" />
+    <Compile Include="Controls\DefaultThemeButton.cs" />
+    <Compile Include="Controls\DefaultThemeFactory.cs" />
+    <Compile Include="Controls\DefaultThemeHistoryButton.cs" />
+    <Compile Include="Controls\DefaultThemeTextField.cs" />
+    <Compile Include="Controls\FormElement.cs" />
+    <Compile Include="Forms\CalculatorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DarkThemeButton.cs" />
-    <Compile Include="DarkThemeFactory.cs" />
-    <Compile Include="DarkThemeHistoryButton.cs" />
-    <Compile Include="DarkThemeTextField.cs" />
-    <Compile Include="DefaultThemeButton.cs" />
-    <Compile Include="DefaultThemeFactory.cs" />
-    <Compile Include="DefaultThemeHistoryButton.cs" />
-    <Compile Include="DefaultThemeTextField.cs" />
-    <Compile Include="ErrorFactory.cs" />
-    <Compile Include="ExceptionHandler.cs" />
-    <Compile Include="CustomButton.cs" />
-    <Compile Include="CustomTextField.cs" />
-    <Compile Include="CalculatorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CalculatorForm.Designer.cs">
+    <Compile Include="Forms\CalculatorForm.Designer.cs">
       <DependentUpon>CalculatorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ErrorLogger.cs" />
-    <Compile Include="CalculationValidator.cs" />
-    <Compile Include="FileManager.cs" />
-    <Compile Include="ContainerManager.cs" />
-    <Compile Include="FormElement.cs" />
-    <Compile Include="CustomHistoryButton.cs" />
-    <Compile Include="IExceptionObserver.cs" />
-    <Compile Include="IFormElementFactory.cs" />
+    <Compile Include="Forms\CalculatorHistoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interfaces\IExceptionObserver.cs" />
+    <Compile Include="Interfaces\IFormElementFactory.cs" />
+    <Compile Include="Models\Calculation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserInputHandler.cs" />
-    <Compile Include="UserNotification.cs" />
-    <EmbeddedResource Include="CalculatorForm.resx">
+    <Compile Include="Services\CalculationValidator.cs" />
+    <Compile Include="Services\CalculatorCore.cs" />
+    <Compile Include="Services\ContainerManager.cs" />
+    <Compile Include="Services\ErrorFactory.cs" />
+    <Compile Include="Services\FileManager.cs" />
+    <Compile Include="Services\UserInputHandler.cs" />
+    <Compile Include="Utilities\ErrorLogger.cs" />
+    <Compile Include="Utilities\ExceptionHandler.cs" />
+    <Compile Include="Utilities\UserNotification.cs" />
+    <EmbeddedResource Include="Forms\CalculatorForm.resx">
       <DependentUpon>CalculatorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CalculatorHistoryForm.resx">
+    <EmbeddedResource Include="Forms\CalculatorHistoryForm.resx">
       <DependentUpon>CalculatorHistoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -153,5 +153,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

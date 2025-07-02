@@ -68,11 +68,17 @@ namespace Engineering_Calculator
 
         private void ShowHistoryForm()
         {
-            historyForm = new CalculatorHistoryForm(core.Containers.Calculations);
-            historyForm.Owner = this;
-            historyForm.StartPosition = FormStartPosition.Manual;
-            historyForm.Location = new Point(this.Location.X, this.Location.Y);
-            historyForm.Show();
+            if (historyForm == null || historyForm.IsDisposed) 
+            {
+                historyForm = new CalculatorHistoryForm(core.Containers.Calculations);
+                historyForm.Owner = this;
+                historyForm.StartPosition = FormStartPosition.Manual;
+                historyForm.Location = new Point(this.Location.X, this.Location.Y);
+                historyForm.Show();
+            }
+            else
+                historyForm.BringToFront();
+
         }
 
         private void ShowDefaultTheme()
