@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # History and log files
-history.txt
-log.txt
+bin/Debug/history.txt
+bin/Debug/log.txt
