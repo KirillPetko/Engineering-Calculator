@@ -25,7 +25,7 @@ Can be diled and performed from input field. Currently avaliable:<br />
 <code style="color : darkorange">-dark</code> - switches to dark theme.<br />
 <code style="color : darkorange">-default</code> - switches to default theme.<br />
 <br />
-<strong>Exeption types</strong><br />
+<strong>Exception types</strong><br />
 1.<code style="color : darkorange">Invalid input</code> - input expression does not correspond to rules described above.<br />
 2.<code style="color : darkorange">Wrong operands format</code> - means that on or more operands in expression acquired a sientific notation in process of calculation (double operand has more than fifteen digits).Note that expression after calculation has only obe such number it will be displayed as result.<br />
 3.<code style="color : darkorange">NaN value</code> - calculated expression contains NaN - on of operands, or whole result is undefined (https://learn.microsoft.com/en-us/dotnet/api/system.double.nan).<br />
