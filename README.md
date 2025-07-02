@@ -16,7 +16,7 @@ Can be diled and performed from input field. Currently avaliable:<br />
 <code style="color : darkorange">-log</code> - opens log.txt.<br />
 <code style="color : darkorange">-history</code> - opens history.txt.<br />
 <code style="color : darkorange">-deletelog</code> - removes log.txt.<br />
-<code style="color : darkorange">-deletehistory</code> - removes history.tx.<br />
+<code style="color : darkorange">-deletehistory</code> - removes history.txt.<br />
 <code style="color : darkorange">-dark</code> - switches to dark theme.<br />
 <code style="color : darkorange">-default</code> - switches to default theme.<br />
 <br />
