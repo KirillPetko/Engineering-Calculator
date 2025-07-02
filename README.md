@@ -1,4 +1,6 @@
-# <b>Engineering Calculator</b><br /><br />
+
+# <b>Engineering Calculator</b><br />
+###########################<br />
 <strong>To use properly insure that:</strong><br />
 1.After each number there is a sign of operation.<br />
 2.After each word of operation there is open paren '('.<br />
@@ -37,3 +39,4 @@ DEL button on your keyboard or 'C' button on GUI.<br />
 Currently log file is called "log.txt" and it contains formed error messages in format: [data]  [message]  [user input]  [string which caused error]. Causing error string could appear during calculation process, so it may differ from user input.<br />
 Full history contained in "history.txt" in form of time of saving to file, valid user input = result.<br />
 History of a runtime can be shown in dedicated form by clicking on history button, drawn on input field.<br />
+
