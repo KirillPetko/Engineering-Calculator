@@ -75,8 +75,12 @@ namespace Engineering_Calculator
             System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
             try
             {
-                if(ExecuteCommand())
+                if (ExecuteCommand())
+                { 
+                    ClearCaption();
                     return;
+                }
+                    
                 Product = new Calculation(textField.Caption);
                 result = Convert.ToString(Product.Result);
                 textField.Caption = result.Replace(",", ".");
@@ -289,27 +293,21 @@ namespace Engineering_Calculator
             {
                 case "-history":
                     FileManager.OpenFile(textField.Caption);
-                    ClearCaption();
                     return true;
                 case "-log":
                     FileManager.OpenFile(textField.Caption);
-                    ClearCaption();
                     return true;
                 case "-removehistory":
                     FileManager.DeleteFile("history.txt");
-                    ClearCaption();
                     return true;
                 case "-removelog":
                     FileManager.DeleteFile("log.txt");
-                    ClearCaption();
                     return true;
                 case "-dark":
                     DarkThemeRequested.Invoke();
-                    ClearCaption();
                     return true;
                 case "-default":
                     DefaultThemeRequested.Invoke();
-                    ClearCaption();
                     return true;
                 default:
                     return false;
