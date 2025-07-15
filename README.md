@@ -23,7 +23,7 @@ Can be diled and performed from input field. Currently avaliable:<br />
 <code style="color : darkorange">-default</code> - switches to default theme.<br />
 <br />
 <strong>Keyboard input</strong><br />
-You can type text to calulator's input filed with any button, if its KeyDown() event was implemented.<br />
+You can type text to input filed with any button, if its KeyDown() event was implemented.<br />
 Any letters, numbers, or operation symbols. Backspace deletes one symbol, DEL clears input field.<br />
 If any exeption message, or "Invalid input" message appears, proceed to clear input field by<br />
 DEL button on your keyboard or 'C' button on GUI.<br />
